@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+  html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #333 #0a0a0a; }
+
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ---- GRAIN OVERLAY ---- */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  /* ---- PINK GLITCH KEYFRAMES ---- */
+  @keyframes glitch {
+    0% { text-shadow: 2px 0 #ff2d8a, -2px 0 #d600ff; transform: translate(0); }
+    15% { text-shadow: -3px 0 #ff2d8a, 3px 0 #d600ff; transform: translate(2px, -1px); }
+    30% { text-shadow: 3px -2px #ff2d8a, -3px 2px #d600ff; transform: translate(-1px, 2px); }
+    45% { text-shadow: -2px 2px #ff2d8a, 2px -2px #d600ff; transform: translate(1px, 1px); }
+    60% { text-shadow: 2px 1px #ff2d8a, -2px -1px #d600ff; transform: translate(-2px, -1px); }
+    75% { text-shadow: -1px -1px #ff2d8a, 1px 1px #d600ff; transform: translate(0px, 2px); }
+    100% { text-shadow: 2px 0 #ff2d8a, -2px 0 #d600ff; transform: translate(0); }
+  }
+
+  @keyframes glitchSmall {
+    0%, 100% { text-shadow: 1px 0 #ff2d8a, -1px 0 #d600ff; }
+    25% { text-shadow: -1px 1px #ff2d8a, 1px -1px #d600ff; }
+    50% { text-shadow: 1px -1px #ff2d8a, -1px 1px #d600ff; }
+    75% { text-shadow: -1px 0 #ff2d8a, 1px 0 #d600ff; }
+  }
+
+  @keyframes glitchLine {
+    0%, 100% { opacity: 0; }
+    48% { opacity: 0; }
+    50% { opacity: 0.8; }
+    52% { opacity: 0; }
+    70% { opacity: 0; }
+    71% { opacity: 0.6; }
+    72% { opacity: 0; }
+  }
+
+  @keyframes glitchBg {
+    0%, 100% { background-position: 0 0; }
+    20% { background-position: -2px 1px; }
+    40% { background-position: 1px -1px; }
+    60% { background-position: -1px 2px; }
+    80% { background-position: 2px 0; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes quoteGlitch {
+    0%, 90%, 100% { text-shadow: none; opacity: 0.5; }
+    92% { text-shadow: 2px 0 #ff2d8a, -2px 0 #d600ff; opacity: 0.7; }
+    94% { text-shadow: -1px 1px #ff2d8a, 1px -1px #d600ff; opacity: 0.4; }
+    96% { text-shadow: 1px -1px #ff2d8a, -1px 1px #d600ff; opacity: 0.8; }
+    98% { text-shadow: none; opacity: 0.5; }
+  }
+
+  @keyframes scanline {
+    0% { top: -5%; }
+    100% { top: 105%; }
+  }
+
+  /* ---- GLOBAL GLITCH CLASS ---- */
+  .glitching {
+    animation: glitchSmall 0.15s ease-in-out !important;
+  }
+
+  /* ---- SCANLINE OVERLAY ---- */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -5%;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 20%, rgba(255, 45, 138, 0.15) 50%, transparent 80%);
+    pointer-events: none;
+    z-index: 9998;
+    animation: scanline 4s linear infinite;
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .hero__play {
+    font-size: 1rem;
+    color: #ff2d8a;
+    letter-spacing: 0.5em;
+    margin-bottom: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .hero__name {
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #fff;
+    position: relative;
+    cursor: default;
+  }
+
+  .hero__name:hover {
+    animation: glitch 0.3s ease-in-out;
+  }
+
+  .hero__tagline {
+    font-size: clamp(0.75rem, 2vw, 1rem);
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #666;
+    margin-top: 1.2rem;
+  }
+
+  .hero__quote {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #666;
+    letter-spacing: 0.1em;
+    margin-top: 2rem;
+    max-width: 500px;
+    animation: quoteGlitch 6s ease-in-out infinite;
+    transition: opacity 0.5s;
+  }
+
+  .hero__divider {
+    width: 60px;
+    height: 1px;
+    background: #333;
+    margin: 2rem auto;
+  }
+
+  .hero__scroll {
+    position: absolute;
+    bottom: 2rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #444;
+    animation: fadeInUp 2s ease infinite alternate;
+  }
+
+  /* ---- MAIN CONTENT ---- */
+  .content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ---- SECTION QUOTE (between sections) ---- */
+  .section-quote {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    padding: 1.5rem 0;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    margin-bottom: 2rem;
+    animation: quoteGlitch 8s ease-in-out infinite;
+  }
+
+  /* ---- TABS NAV ---- */
+  .tabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border-bottom: 1px solid #222;
+    margin-bottom: 2rem;
+  }
+
+  .tabs-nav__btn {
+    background: none;
+    border: none;
+    color: #555;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.8rem 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s, background 0.3s;
+    position: relative;
+  }
+
+  .tabs-nav__btn:hover {
+    background: #ff2d8a;
+    color: #0a0a0a;
+  }
+
+  .tabs-nav__btn.active {
+    color: #fff;
+  }
+
+  .tabs-nav__btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: #ff2d8a;
+  }
+
+  /* ---- TAB PANELS ---- */
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  /* ---- SUB-TABS ---- */
+  .subtabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .subtabs-nav__btn {
+    background: transparent;
+    border: 1px solid #333;
+    color: #666;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .subtabs-nav__btn:hover {
+    background: #ff2d8a;
+    color: #0a0a0a;
+    border-color: #ff2d8a;
+  }
+
+  .subtabs-nav__btn.active {
+    background: #ff2d8a;
+    color: #0a0a0a;
+    border-color: #ff2d8a;
+  }
+
+  /* ---- SUBTAB PANELS ---- */
+  .subtab-panel {
+    display: none;
+  }
+
+  .subtab-panel.active {
+    display: block;
+  }
+
+  /* ---- TYPOGRAPHY ---- */
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 0.8rem;
+  }
+
+  p, li {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: #1a1a1a;
+    margin: 2rem 0;
+  }
+
+  /* ---- PLACEHOLDER IMAGES ---- */
+  .placeholder-img {
+    width: 100%;
+    max-width: 400px;
+    height: 250px;
+    background: #161616;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 1.5rem 0;
+  }
+
+  /* ---- LOVE LIST ---- */
+  .love-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .love-list li {
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .love-list li a {
+    color: #aaa;
+    text-decoration: none;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .love-list li a:hover {
+    color: #ff2d8a;
+  }
+
+  .heart {
+    color: #555;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: color 0.3s;
+  }
+
+  .love-list li a:hover .heart {
+    color: #ff2d8a;
+  }
+
+  /* ---- SPOTIFY EMBED ---- */
+  .spotify-wrap {
+    margin-top: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .spotify-wrap iframe {
+    width: 100%;
+    border: none;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  .social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #333;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .social-icons a:hover {
+    background: #ff2d8a;
+    border-color: #ff2d8a;
+  }
+
+  .social-icons a:hover svg {
+    fill: #0a0a0a;
+  }
+
+  .social-icons svg {
+    width: 18px;
+    height: 18px;
+    fill: #666;
+    transition: fill 0.3s;
+  }
+
+  .footer-quote {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: #444;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+    animation: quoteGlitch 7s ease-in-out infinite;
+  }
+
+  .footer-copy {
+    font-size: 0.65rem;
+    color: #333;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* ---- GLITCH LINES (decorative, multiple) ---- */
+  .glitch-line {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff2d8a, #d600ff, transparent);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9998;
+    animation: glitchLine 5s ease-in-out infinite;
+  }
+
+  .glitch-line:nth-child(1) { top: 0; animation-delay: 0s; }
+  .glitch-line:nth-child(2) { top: 33%; animation-delay: 1.8s; }
+  .glitch-line:nth-child(3) { top: 66%; animation-delay: 3.5s; }
+
+  /* ---- FADE-IN ON SCROLL ---- */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 600px) {
+    .tabs-nav__btn { padding: 0.6rem 0.8rem; font-size: 0.7rem; }
+    .subtabs-nav__btn { padding: 0.4rem 0.7rem; font-size: 0.65rem; }
+    h2 { font-size: 1.4rem; }
+    .placeholder-img { height: 180px; }
+  }
+  
+  /* ---- BIO LINE ---- */
+  .bio-line {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ---- ABOUT LIST ---- */
+  .about-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .about-list li {
+    position: relative;
+    padding-left: 1.2rem;
+    margin-bottom: 0.8rem;
+    color: #aaa;
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+
+  .about-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #ff2d8a;
+    font-weight: 700;
+  }
+
+  .accent {
+    color: #ff2d8a;
+    font-weight: 700;
+  }
+
+  /* ---- COLLAPSIBLE ---- */
+  .collapsible {
+    background: none;
+    border: 1px solid #222;
+    color: #555;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    margin: 1rem 0 0.5rem;
+    transition: all 0.3s;
+    display: block;
+  }
+
+  .collapsible:hover {
+    background: #ff2d8a;
+    color: #0a0a0a;
+    border-color: #ff2d8a;
+  }
+
+  .collapsible.open {
+    border-color: #ff2d8a;
+    color: #ff2d8a;
+  }
+
+  .collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, padding 0.5s ease;
+    padding: 0;
+  }
+
+  .collapsible-content.open {
+    max-height: 800px;
+    padding: 0.8rem 0;
+  }
+
+  /* ---- EASTER EGG ---- */
+  .easter-egg-trigger {
+    color: #555;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    margin-top: 0.5rem;
+  }
+
+  .easter-egg-trigger:hover {
+    color: #ff2d8a;
+  }
+
+  .easter-egg-hidden {
+    color: #ff2d8a;
+    font-size: 0.8rem;
+    font-style: italic;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    margin-top: 0.3rem;
+  }
+
+  .easter-egg-hidden.revealed {
+    max-height: 60px;
+    opacity: 1;
+  }
+
+  /* ---- KIN LIST ---- */
+  .kin-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .kin-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #151515;
+  }
+
+  .kin-name {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .kin-source {
+    color: #555;
+    font-size: 0.75rem;
+    font-style: italic;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---- FANDOM GRID ---- */
+  .fandom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 600px) {
+    .fandom-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+  }
+
+  .fandom-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .fandom-list li {
+    padding: 0.4rem 0;
+    color: #aaa;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #131313;
+    transition: color 0.3s;
+  }
+
+  .fandom-list li:hover {
+    color: #ff2d8a;
+  }
+
+  /* ---- MUTED NOTE ---- */
+  .muted-note {
+    color: #444;
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 1.5rem;
+  }
+
+  .muted-inline {
+    color: #444;
+    font-size: 0.8em;
+  }
+
+  /* ---- DNI BLOCKQUOTE ---- */
+  .dni-note {
+    border-left: 2px solid #222;
+    padding: 1rem 1.2rem;
+    margin-top: 1.5rem;
+    color: #444;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    font-style: italic;
+  }
+  
+</style>
+</head>
+<body>
+
+<div class="glitch-line"></div>
+<div class="glitch-line"></div>
+<div class="glitch-line"></div>
+
+<!-- ======== HERO ======== -->
+<section class="hero">
+  <div class="hero__play">▶ PLAY</div>
+  <h1 class="hero__name">RAVEN</h1>
+  <p class="hero__tagline">bisexual &nbsp;|&nbsp; she/her &nbsp;|&nbsp; isfp</p>
+  <div class="hero__divider"></div>
+  <p class="hero__quote" id="heroQuote"></p>
+  <span class="hero__scroll">scroll</span>
+</section>
+
+<!-- ======== CONTENT ======== -->
+<main class="content">
+
+  <!-- RANDOM QUOTE BETWEEN SECTIONS -->
+  <div class="section-quote fade-in" id="sectionQuote1"></div>
+
+  <!-- TABS NAV -->
+  <nav class="tabs-nav fade-in">
+    <button class="tabs-nav__btn active" data-tab="about">О себе</button>
+    <button class="tabs-nav__btn" data-tab="work">Где я работаю</button>
+    <button class="tabs-nav__btn" data-tab="playlist">Мой плейлист</button>
+    <button class="tabs-nav__btn" data-tab="lovelist">Лав-лист</button>
+  </nav>
+
+  <!-- ======== TAB: О СЕБЕ ======== -->
+  <div class="tab-panel active" id="tab-about">
+    <div class="subtabs-nav fade-in">
+      <button class="subtabs-nav__btn active" data-subtab="me">Я</button>
+      <button class="subtabs-nav__btn" data-subtab="fandoms">Мои фандомы</button>
+      <button class="subtabs-nav__btn" data-subtab="kinlist">Мой кинн-лист</button>
+      <button class="subtabs-nav__btn" data-subtab="thinice">Тонкий лёд</button>
+      <button class="subtabs-nav__btn" data-subtab="dni">DNI</button>
+    </div>
+
+    <div class="subtab-panel active" id="subtab-me">
+  <h2 class="fade-in">Я</h2>
+  <p class="bio-line fade-in">18.03  |  18 лет  |  Melancholic  |  4w5  |  sp4 so5 so9</p>
+
+  <div class="fade-in">
+    <ul class="about-list">
+      <li>В первую очередь собеседник, с которым тебе никогда не будет скучно. <span class="accent">Кар!</span> Мне характерно что-то тупое вкинуть и радостно убежать, сверкая пятками.</li>
+      <li>Учусь в строительном колледже, с последующим «повышением» на архитектора. Истинная чертила.</li>
+      <li>Редко, но метко отвечаю. Чаще всего торчу в публичных чатах, пушта соц.батарейка низкая. Шучу.. плохо. Но иногда это и вправду смешно!</li>
+      <li>Не понимаю намёков. Люблю, когда пишут всё прямо и не держат проблемы в себе. Главное в меру, я вам не мусорный бак и не личный психолог.</li>
+    </ul>
+
+    <button class="collapsible">ещё обо мне ▾</button>
+    <div class="collapsible-content">
+      <ul class="about-list">
+        <li>80% моё состояние — грустинка. Если я не хочу чего-то говорить — не надо меня упрашивать. Я 100% сп4, мне надо просто переварить самой проблемы, и я вернусь к вам свежая и хорошенькая.</li>
+        <li>Любите рандомные факты, шутки, пикчи с надписью «мы»? Это ко мне!!!</li>
+        <li>Отношусь ко всем дружелюбно, даже к табуреткам. Главное не начните мне говорить, что кто-то круче, а кто-то хуже. Нейтрально отношусь к трансам. Сама иногда юзаю слюры и дико шучу про евреев.</li>
+        <li>Я даркшиппер... ненавижу реальную чернь по типу инцестов, педо/зоо и т.д, но мои любимые пейринги это шаркбомб и ДжоЭлли (оба относятся к псевдо-инцестам), так что к пейрингам вымышленных персонажей такого типа я нормально отношусь.</li>
+      </ul>
+      <p class="easter-egg-trigger">А ещё? Ну.. ничего.. наверное..</p>
+      <p class="easter-egg-hidden">А ещё у меня косичка почти метровая.. ну.. вдруг это кому-то интересно..</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+        <h3 class="fade-in">А вообще, я:</h3>
+        <ul class="about-list fade-in">
+          <li>Делаю и тестирую ИИ ботов</li>
+          <li>Гарант на торговых площадках</li>
+          <li>Рисую, пишу, ролю</li>
+        </ul>
+      </div>
+
+    <div class="subtab-panel" id="subtab-fandoms">
+      <h2 class="fade-in">Мои фандомы</h2>
+      <div class="fandom-grid fade-in">
+      <img src="photo1.jpg" alt="фото" class="fade-in" style="width:100%; max-width:400px; border:1px solid #333; margin:1.5rem 0;">
+      <div class="fandom-col">
+        <h3>Игры</h3>
+        <ul class="fandom-list">
+          <li>The Witcher</li>
+          <li>Mortal Kombat</li>
+          <li>Cyberpunk 2077</li>
+          <li>The Last of Us</li>
+          <li>Arcane + LOL</li>
+          <li>Horizon</li>
+        </ul>
+      </div>
+      <div class="fandom-col">
+        <h3>Кино</h3>
+        <ul class="fandom-list">
+          <li>Фильмы Люка Бессона</li>
+          <li>The Matrix</li>
+          <li>Dr. House</li>
+          <li>Pixar & Disney animation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+      <div class="subtab-panel" id="subtab-kinlist">
+      <h2 class="fade-in">Мой кинн-лист</h2>
+      <img src="photo2.jpg" alt="фото" class="fade-in" style="width:100%; max-width:400px; border:1px solid #333; margin:1.5rem 0;">
+      <ul class="kin-list fade-in">
+        <li><span class="kin-name">Gregory House</span> <span class="kin-source">Dr. House</span></li>
+        <li><span class="kin-name">Silco</span> <span class="kin-source">Arcane</span></li>
+        <li><span class="kin-name">Joel Miller</span> <span class="kin-source">The Last of Us</span></li>
+        <li><span class="kin-name">Blu</span> <span class="kin-source">Rio</span></li>
+        <li><span class="kin-name">Aurora</span> <span class="kin-source">League of Legends</span></li>
+      </ul>
+    </div>
+
+    <div class="subtab-panel" id="subtab-thinice">
+  <h2 class="fade-in">Тонкий лёд</h2>
+  <ul class="about-list fade-in">
+    <li>Ебанаты, поддерживающие нацизм, фашизм</li>
+    <li>Селфхармщики</li>
+    <li>Культ спавна</li>
+    <li>Поддерживающие педо/зоо/другие -филии</li>
+    <li>Толерашки</li>
+    <li>Агрессивная сторона ЛГБТК+</li>
+  </ul>
+  <p class="muted-note fade-in">Ну и всё как бы, я даже с кроссовком могу закентиться, вщ похую.</p>
+</div>
+
+    <div class="subtab-panel" id="subtab-dni">
+  <h2 class="fade-in">DNI</h2>
+  <ul class="about-list fade-in">
+    <li>Бывшие одноклассники</li>
+    <li>Люди, у которых в ФД и кинн-списках только зафоршенные/популяр фд, якие умирают через месяц. Ну мне типо с вами вообще не о чем будет поболтать.</li>
+    <li>Люди с нейроотличиями, которые были самодиагностированы с помощью левых тестов из интернета или тиктока <span class="muted-inline">(если у вас есть более веские аргументы — базару ноль, сходить к специалисту в наших реалиях это поистине дорогое удовольствие)</span></li>
+    <li>Предвзятое отношение к собеседнику или слишком частые сообщения, и/или любящие писать «ау?», «забей», если им тут же не ответили.</li>
+  </ul>
+
+    <blockquote class="dni-note fade-in">
+      Поймите одну вещь: я не ебу в 100% случаях кто вы, что вы за человек и с кем ебётесь, поэтому без объяснений я ливаю из диалога. Отвечаю я редко, о людях в интернете... особенно в лс... я тупо забываю :( Поэтому если я пропала, то это может значить, что я конкретно к вам уже не приду, либо (если отвечаю не спустя сутки, а шустрее поддержки роблокса) вы мне очень нравитесь, но я забываю ответить. Пинайте смело во второй раз. Можно и в третий...
+    </blockquote>
+  </div>
+  
+  </div> <!-- ЗАКРЫТИЕ tab-about -->
+  
+  <!-- ======== TAB: ГДЕ Я РАБОТАЮ ======== -->
+  <div class="tab-panel" id="tab-work">
+    <h2 class="fade-in">Где я работаю</h2>
+    <div class="divider"></div>
+    <p class="fade-in"><!-- работа --></p>
+  </div>
+
+  <!-- ======== TAB: ПЛЕЙЛИСТ ======== -->
+  <div class="tab-panel" id="tab-playlist">
+    <h2 class="fade-in">Мой плейлист</h2>
+    <div class="divider"></div>
+    <div class="spotify-wrap fade-in">
+      <iframe src="https://open.spotify.com/album/2ajCD41iDxflpYBZmSO9S7?utm_source=generator&theme=0" height="452" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- ======== TAB: ЛАВ-ЛИСТ ======== -->
+  <div class="tab-panel" id="tab-lovelist">
+    <h2 class="fade-in">Лав-лист</h2>
+    <div class="divider"></div>
+    <ul class="love-list fade-in">
+      <li><a href="https://t.me/te44iko" target="_blank"><span class="heart">♡</span> Терри</a></li>
+      <li><a href="tg://openmessage?user_id=1170602873" target="_blank"><span class="heart">♡</span> Тарек</a></li>
+    </ul>
+  </div>
+
+</main>
+
+<!-- ======== FOOTER ======== -->
+<footer>
+  <div class="footer-quote" id="footerQuote"></div>
+  <div class="social-icons fade-in">
+    <!-- Telegram SVG -->
+    <a href="https://t.me/your_username" target="_blank" title="Telegram">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+    </a>
+    <!-- VK SVG -->
+    <a href="https://vk.com/your_id" target="_blank" title="VKontakte">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.391 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.864-.525-2.05-1.727-1.033-1-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.593v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.12-5.335-3.202C4.624 10.857 4.03 8.57 4.03 8.096c0-.254.102-.491.593-.491h1.744c.44 0 .61.203.78.678.847 2.49 2.27 4.675 2.853 4.675.22 0 .322-.102.322-.66V9.721c-.068-1.186-.695-1.287-.695-1.71 0-.203.17-.407.44-.407h2.744c.373 0 .508.203.508.643v3.473c0 .372.17.508.271.508.22 0 .407-.136.813-.542 1.253-1.406 2.15-3.574 2.15-3.574.119-.254.322-.491.763-.491h1.744c.525 0 .644.27.525.643-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.05.17.49-.085.744-.576.744z"/></svg>
+    </a>
+  </div>
+  <p class="footer-copy">© 2025</p>
+</footer>
+
+<script>
+  // ---- ЦИТАТЫ ШИРАНА ----
+  const quotes = [
+    "Kept quiet, but I came to be heard",
+    "Two of tried, but I won both cases",
+    "I feel an overwhelming sadness, of all the friends I do not have left",
+    "Orbit me, my satellite",
+    "Don't wanna make an enemy of you",
+    "We stack inside of war game"
+  ];
+
+  function getRandomQuote(exclude) {
+    let filtered = quotes.filter(q => q !== exclude);
+    return filtered[Math.floor(Math.random() * filtered.length)];
+  }
+
+  // Заполняем цитаты при загрузке
+  const heroQuote = document.getElementById('heroQuote');
+  const sectionQuote1 = document.getElementById('sectionQuote1');
+  const footerQuote = document.getElementById('footerQuote');
+
+  heroQuote.textContent = '"' + getRandomQuote('') + '"';
+  sectionQuote1.textContent = '"' + getRandomQuote(heroQuote.textContent) + '"';
+  footerQuote.textContent = '"' + getRandomQuote(sectionQuote1.textContent) + '"';
+
+  // Ротация цитат каждые 8 секунд
+  setInterval(() => {
+    heroQuote.style.opacity = '0';
+    setTimeout(() => {
+      heroQuote.textContent = '"' + getRandomQuote(heroQuote.textContent) + '"';
+      heroQuote.style.opacity = '';
+    }, 500);
+  }, 8000);
+
+  setInterval(() => {
+    sectionQuote1.style.opacity = '0';
+    setTimeout(() => {
+      sectionQuote1.textContent = '"' + getRandomQuote(sectionQuote1.textContent) + '"';
+      sectionQuote1.style.opacity = '';
+    }, 500);
+  }, 11000);
+
+  setInterval(() => {
+    footerQuote.style.opacity = '0';
+    setTimeout(() => {
+      footerQuote.textContent = '"' + getRandomQuote(footerQuote.textContent) + '"';
+      footerQuote.style.opacity = '';
+    }, 500);
+  }, 14000);
+
+  // ---- ГЛИТЧ ПО ВСЕМУ САЙТУ ----
+  const glitchTargets = document.querySelectorAll(
+    '.hero__name, .hero__play, .hero__tagline, h2, h3, .section-quote, .footer-quote, .footer-copy'
+  );
+
+  function triggerRandomGlitch() {
+    // Выбираем 1-3 случайных элемента
+    let count = Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < count; i++) {
+      let target = glitchTargets[Math.floor(Math.random() * glitchTargets.length)];
+      target.classList.add('glitching');
+      setTimeout(() => {
+        target.classList.remove('glitching');
+      }, 150 + Math.random() * 200);
+    }
+  }
+
+  // Глитч каждые 1.5-3 секунды (рандомный интервал)
+  function scheduleGlitch() {
+    let delay = 1500 + Math.random() * 1500;
+    setTimeout(() => {
+      triggerRandomGlitch();
+      scheduleGlitch();
+    }, delay);
+  }
+  scheduleGlitch();
+
+  // Дополнительный глитч на hero__name — чаще и агрессивнее
+  const heroName = document.querySelector('.hero__name');
+  setInterval(() => {
+    if (Math.random() > 0.5) {
+      heroName.style.animation = 'glitch 0.25s ease-in-out';
+      setTimeout(() => { heroName.style.animation = 'none'; }, 250);
+    }
+  }, 2000);
+
+  // ---- СЛУЧАЙНЫЕ ГОРИЗОНТАЛЬНЫЕ ГЛИТЧ-ПОЛОСЫ ----
+  function spawnGlitchBar() {
+    const bar = document.createElement('div');
+    bar.style.cssText = `
+      position: fixed;
+      left: 0;
+      width: ${30 + Math.random() * 70}%;
+      height: ${1 + Math.random() * 3}px;
+      top: ${Math.random() * 100}%;
+      background: linear-gradient(90deg, transparent, rgba(255,45,138,${0.2 + Math.random() * 0.4}), rgba(214,0,255,${0.1 + Math.random() * 0.3}), transparent);
+      pointer-events: none;
+      z-index: 9997;
+    `;
+    document.body.appendChild(bar);
+    setTimeout(() => bar.remove(), 80 + Math.random() * 150);
+  }
+
+  setInterval(() => {
+    if (Math.random() > 0.4) {
+      let bursts = Math.floor(Math.random() * 3) + 1;
+      for (let i = 0; i < bursts; i++) {
+        setTimeout(() => spawnGlitchBar(), i * 30);
+      }
+    }
+  }, 2500);
+
+  // ---- TABS ----
+  const tabBtns = document.querySelectorAll('.tabs-nav__btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabPanels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      observeAll();
+    });
+  });
+
+  // ---- SUB-TABS ----
+  const subBtns = document.querySelectorAll('.subtabs-nav__btn');
+  const subPanels = document.querySelectorAll('.subtab-panel');
+
+  subBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      subBtns.forEach(b => b.classList.remove('active'));
+      subPanels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('subtab-' + btn.dataset.subtab).classList.add('active');
+      observeAll();
+    });
+  });
+
+  // ---- FADE-IN ON SCROLL ----
+  function observeAll() {
+    const faders = document.querySelectorAll('.fade-in:not(.visible)');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    faders.forEach(el => observer.observe(el));
+  }
+
+  observeAll();
+
+  // ---- ГЛИТЧ ПРИ ХОВЕРЕ НА ЗАГОЛОВКИ ----
+  document.querySelectorAll('h2, h3, .hero__name').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      el.classList.add('glitching');
+      setTimeout(() => el.classList.remove('glitching'), 200);
+    });
+  });
+  
+  // ---- COLLAPSIBLE SECTIONS ----
+  document.querySelectorAll('.collapsible').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('open');
+      const content = btn.nextElementSibling;
+      content.classList.toggle('open');
+      btn.textContent = content.classList.contains('open') ? 'свернуть ▴' : 'ещё обо мне ▾';
+    });
+  });
+
+  // ---- EASTER EGG ----
+  document.querySelectorAll('.easter-egg-trigger').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const hidden = trigger.nextElementSibling;
+      hidden.classList.toggle('revealed');
+    });
+  });
+</script>
+</body>
+</html>
