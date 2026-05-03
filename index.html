@@ -677,6 +677,131 @@
     font-style: italic;
   }
   
+  /* ---- CONTACT CARDS ---- */
+  .contact-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .contact-card {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1.4rem;
+    border: 1px solid #222;
+    background: #111;
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .contact-card:hover {
+    border-color: #ff2d8a;
+    background: #1a0a12;
+    color: #fff;
+  }
+
+  .contact-icon {
+    font-size: 1.2rem;
+  }
+
+  .contact-label {
+    flex: 1;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  .contact-arrow {
+    color: #333;
+    transition: color 0.3s, transform 0.3s;
+  }
+
+  .contact-card:hover .contact-arrow {
+    color: #ff2d8a;
+    transform: translateX(3px);
+  }
+
+  /* ---- LINK BUTTONS ROW ---- */
+  .link-buttons {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .link-btn {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid #333;
+    background: transparent;
+    color: #888;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .link-btn:hover {
+    background: #ff2d8a;
+    color: #0a0a0a;
+    border-color: #ff2d8a;
+  }
+
+/* ---- QUOTE GLITCH BURST ---- */
+@keyframes quoteBurst {
+  0% { text-shadow: 0 0 transparent; transform: translate(0); }
+  10% { text-shadow: 4px 0 #ff2d8a, -4px 0 #d600ff; transform: translate(-3px, 2px); }
+  20% { text-shadow: -3px -2px #ff2d8a, 3px 2px #d600ff; transform: translate(3px, -1px); }
+  30% { text-shadow: 2px 3px #ff2d8a, -2px -3px #d600ff; transform: translate(-2px, 3px); }
+  40% { text-shadow: -4px 1px #ff2d8a, 4px -1px #d600ff; transform: translate(4px, -2px); }
+  50% { text-shadow: 3px -3px #ff2d8a, -3px 3px #d600ff; transform: translate(-1px, 1px); }
+  60% { text-shadow: -2px 2px #ff2d8a, 2px -2px #d600ff; transform: translate(2px, -3px); }
+  80% { text-shadow: 1px 0 #ff2d8a, -1px 0 #d600ff; transform: translate(-1px, 1px); }
+  100% { text-shadow: none; transform: translate(0); }
+}
+
+.quote-burst {
+  animation: quoteBurst 0.4s ease-in-out !important;
+}
+
+/* ---- SIDE WAVES ---- */
+.side-wave {
+  position: fixed;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9996;
+  opacity: 0;
+}
+
+.side-wave-left {
+  left: 0;
+  background: linear-gradient(180deg, transparent, #ff2d8a, #d600ff, #ff2d8a, transparent);
+}
+
+.side-wave-right {
+  right: 0;
+  background: linear-gradient(180deg, transparent, #d600ff, #ff2d8a, #d600ff, transparent);
+}
+
+@keyframes wavePulse {
+  0% { opacity: 0; transform: scaleY(0.3); }
+  30% { opacity: 0.6; transform: scaleY(1); }
+  60% { opacity: 0.3; transform: scaleY(0.7); }
+  100% { opacity: 0; transform: scaleY(0.2); }
+}
+
+.side-wave.active {
+  animation: wavePulse 0.6s ease-out forwards;
+}
+
 </style>
 </head>
 <body>
@@ -684,7 +809,8 @@
 <div class="glitch-line"></div>
 <div class="glitch-line"></div>
 <div class="glitch-line"></div>
-
+<div class="side-wave side-wave-left" id="waveLeft"></div>
+<div class="side-wave side-wave-right" id="waveRight"></div>
 <!-- ======== HERO ======== -->
 <section class="hero">
   <div class="hero__play">▶ PLAY</div>
@@ -824,9 +950,32 @@
   
   <!-- ======== TAB: ГДЕ Я РАБОТАЮ ======== -->
   <div class="tab-panel" id="tab-work">
-    <h2 class="fade-in">Где я работаю</h2>
+    <h2 class="fade-in">Важные ссылочки</h2>
     <div class="divider"></div>
-    <p class="fade-in"><!-- работа --></p>
+    
+    <div class="fade-in">
+      <h3>Связь со мной</h3>
+      <div class="contact-links">
+        <a href="https://t.me/anonravenbot" target="_blank" class="contact-card">
+          <span class="contact-icon">✉</span>
+          <span class="contact-label">Анонка</span>
+          <span class="contact-arrow">→</span>
+        </a>
+        <a href="https://t.me/vvuem" target="_blank" class="contact-card">
+          <span class="contact-icon">✉</span>
+          <span class="contact-label">ЛС</span>
+          <span class="contact-arrow">→</span>
+        </a>
+      </div>
+    </div>
+    
+    <div class="divider"></div>
+
+    <div class="link-buttons fade-in">
+      <a href="https://t.me/adhdautism" target="_blank" class="link-btn">Арт конфа</a>
+      <a href="https://t.me/siIcocf" target="_blank" class="link-btn">Силко конфа</a>
+      <a href="https://t.me/+daRVGFal5vk0ZDVi" target="_blank" class="link-btn">Пруфы и отзывы</a>
+    </div>
   </div>
 
   <!-- ======== TAB: ПЛЕЙЛИСТ ======== -->
@@ -834,8 +983,9 @@
     <h2 class="fade-in">Мой плейлист</h2>
     <div class="divider"></div>
     <div class="spotify-wrap fade-in">
-      <iframe src="https://open.spotify.com/album/2ajCD41iDxflpYBZmSO9S7?utm_source=generator&theme=0" height="452" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      <iframe src="https://open.spotify.com/embed/album/2ajCD41iDxflpYBZmSO9S7?utm_source=generator&theme=0" height="452" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
     </div>
+    <p class="fade-in" style="margin-top:1rem; font-size:0.75rem; color:#444; font-style:italic;">Не грузится? <a href="https://open.spotify.com/album/2ajCD41iDxflpYBZmSO9S7" target="_blank" style="color:#ff2d8a; text-decoration:none;">Открой в Spotify напрямую ↗</a></p>
   </div>
 
   <!-- ======== TAB: ЛАВ-ЛИСТ ======== -->
@@ -891,30 +1041,38 @@
   sectionQuote1.textContent = '"' + getRandomQuote(heroQuote.textContent) + '"';
   footerQuote.textContent = '"' + getRandomQuote(sectionQuote1.textContent) + '"';
 
-  // Ротация цитат каждые 8 секунд
+// Функция смены цитаты с мощным глитчем
+function changeQuoteWithBurst(element, interval) {
   setInterval(() => {
-    heroQuote.style.opacity = '0';
-    setTimeout(() => {
-      heroQuote.textContent = '"' + getRandomQuote(heroQuote.textContent) + '"';
-      heroQuote.style.opacity = '';
-    }, 500);
-  }, 8000);
+    // Мощный глитч
+    element.classList.add('quote-burst');
+    element.style.opacity = '0';
 
-  setInterval(() => {
-    sectionQuote1.style.opacity = '0';
-    setTimeout(() => {
-      sectionQuote1.textContent = '"' + getRandomQuote(sectionQuote1.textContent) + '"';
-      sectionQuote1.style.opacity = '';
-    }, 500);
-  }, 11000);
+    // Волны по бокам
+    const wL = document.getElementById('waveLeft');
+    const wR = document.getElementById('waveRight');
+    wL.classList.remove('active');
+    wR.classList.remove('active');
+    void wL.offsetWidth; // перезапуск анимации
+    wL.classList.add('active');
+    wR.classList.add('active');
 
-  setInterval(() => {
-    footerQuote.style.opacity = '0';
+    // Глитч-полосы при смене
+    for (let i = 0; i < 4; i++) {
+      setTimeout(() => spawnGlitchBar(), i * 40);
+    }
+
     setTimeout(() => {
-      footerQuote.textContent = '"' + getRandomQuote(footerQuote.textContent) + '"';
-      footerQuote.style.opacity = '';
-    }, 500);
-  }, 14000);
+      element.textContent = '"' + getRandomQuote(element.textContent) + '"';
+      element.style.opacity = '';
+      setTimeout(() => element.classList.remove('quote-burst'), 400);
+    }, 400);
+  }, interval);
+}
+
+changeQuoteWithBurst(heroQuote, 8000);
+changeQuoteWithBurst(sectionQuote1, 11000);
+changeQuoteWithBurst(footerQuote, 14000);
 
   // ---- ГЛИТЧ ПО ВСЕМУ САЙТУ ----
   const glitchTargets = document.querySelectorAll(
@@ -942,15 +1100,6 @@
     }, delay);
   }
   scheduleGlitch();
-
-  // Дополнительный глитч на hero__name — чаще и агрессивнее
-  const heroName = document.querySelector('.hero__name');
-  setInterval(() => {
-    if (Math.random() > 0.5) {
-      heroName.style.animation = 'glitch 0.25s ease-in-out';
-      setTimeout(() => { heroName.style.animation = 'none'; }, 250);
-    }
-  }, 2000);
 
   // ---- СЛУЧАЙНЫЕ ГОРИЗОНТАЛЬНЫЕ ГЛИТЧ-ПОЛОСЫ ----
   function spawnGlitchBar() {
