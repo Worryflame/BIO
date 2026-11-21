@@ -839,7 +839,7 @@
 
 .player__visualizer {
   width: 100%;
-  height: 80px;
+  height: 104px;
   display: block;
   margin-bottom: 1rem;
 }
@@ -1106,31 +1106,30 @@ html[data-theme="sienna"] .footer-quote {
 html[data-theme="sienna"] .hero__divider { background: rgba(255,255,255,.62); }
 html[data-theme="sienna"] .hero__scroll-line {
   position: relative;
-  width: 64px;
-  height: 18px;
+  width: 2px;
+  height: 36px;
   overflow: hidden;
-  background: none;
-  animation: siennaWaveCue 3.2s ease-in-out infinite;
+  border-radius: 999px;
+  background: rgba(255,236,222,.22);
+  animation: none;
 }
-html[data-theme="sienna"] .hero__scroll-line::before,
-html[data-theme="sienna"] .hero__scroll-line::after {
+html[data-theme="sienna"] .hero__scroll-line::before {
   content: '';
   position: absolute;
-  left: 0;
+  inset: 0;
   width: 100%;
-  height: 17px;
-  border-top: 1px solid rgba(255,247,240,.92);
-  border-radius: 50%;
+  height: 55%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,224,189,0), #ffd6a1 42%, #fff4e8 64%, rgba(236,151,123,0));
+  transform: translateY(-110%);
+  animation: siennaScrollShimmer 2.8s cubic-bezier(.42,0,.58,1) infinite;
 }
-html[data-theme="sienna"] .hero__scroll-line::before { top: 7px; }
-html[data-theme="sienna"] .hero__scroll-line::after {
-  top: 11px;
-  opacity: .48;
-  transform: scaleX(.76);
+html[data-theme="sienna"] .hero__scroll > span {
+  color: #ffe6d8;
 }
-@keyframes siennaWaveCue {
-  0%, 100% { opacity: .5; transform: scaleX(.82); }
-  50% { opacity: 1; transform: scaleX(1); }
+@keyframes siennaScrollShimmer {
+  0% { transform: translateY(-110%); }
+  100% { transform: translateY(290%); }
 }
 
 html[data-theme="sienna"] .content,
@@ -1292,6 +1291,10 @@ a:focus-visible,
   }
   .fade-in { opacity: 1; transform: none; }
   .theme-switch__icon { transition: none !important; }
+  html[data-theme="sienna"] .hero__scroll-line::before {
+    animation: none !important;
+    transform: translateY(42%);
+  }
 }
   
 </style>
@@ -2408,32 +2411,31 @@ function updateLyrics() {
 }
 
 // === ВИЗУАЛИЗАТОР (Web Audio API) ===
+const visualizerState = {
+  energy: 0,
+  bands: [0, 0, 0],
+  clock: 0,
+  lastTime: 0
+};
+
 function initVisualizer() {
-  if (visualizerStarted) return;
-  visualizerStarted = true;
-
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioCtx.createAnalyser();
-  source = audioCtx.createMediaElementSource(audio);
-  source.connect(analyser);
-  analyser.connect(audioCtx.destination);
-  analyser.fftSize = 128;
-  analyser.smoothingTimeConstant = 0.84;
-  bufferLength = analyser.frequencyBinCount;
-  dataArray = new Uint8Array(bufferLength);
-
-  drawVisualizer();
+  if (!visualizerStarted) {
+    visualizerStarted = true;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    source = audioCtx.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.9;
+    bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+  startVisualizerLoop();
 }
 
-function drawVisualizer() {
-  if (document.hidden) {
-    visualizerFrame = null;
-    return;
-  }
-  visualizerFrame = reduceMotion.matches
-    ? setTimeout(drawVisualizer, 250)
-    : requestAnimationFrame(drawVisualizer);
-
+function resizeVisualizerCanvas() {
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
   const displayWidth = Math.max(1, canvas.offsetWidth);
   const displayHeight = Math.max(1, canvas.offsetHeight);
@@ -2442,90 +2444,198 @@ function drawVisualizer() {
     canvas.height = Math.round(displayHeight * pixelRatio);
   }
   ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-
-  analyser.getByteFrequencyData(dataArray);
-
-  ctx.clearRect(0, 0, displayWidth, displayHeight);
-
-  if (document.documentElement.dataset.theme === 'sienna') {
-    drawSiennaWaves(displayWidth, displayHeight);
-    return;
-  }
-
-  const barCount = bufferLength;
-  const barWidth = displayWidth / barCount;
-  const centerY = displayHeight / 2;
-
-  for (let i = 0; i < barCount; i++) {
-    const val = dataArray[i] / 255;
-    const barHeight = val * centerY * 0.9;
-
-    // Градиент от розового к фиолетовому
-    const r = 255;
-    const g = 45 + (i / barCount) * 50;
-    const b = 138 + (i / barCount) * 117;
-    const alpha = 0.4 + val * 0.6;
-
-    ctx.fillStyle = 'rgba(' + Math.floor(r) + ',' + Math.floor(g) + ',' + Math.floor(b) + ',' + alpha + ')';
-
-    // Волна вверх от центра
-    ctx.fillRect(i * barWidth, centerY - barHeight, barWidth - 1, barHeight);
-    // Зеркальная волна вниз
-    ctx.fillRect(i * barWidth, centerY, barWidth - 1, barHeight * 0.6);
-  }
-
-  // Центральная линия
-  ctx.fillStyle = 'rgba(255, 45, 138, 0.15)';
-  ctx.fillRect(0, centerY - 0.5, displayWidth, 1);
+  return { width: displayWidth, height: displayHeight };
 }
 
-function drawSiennaWaves(width, height) {
-  const center = height / 2;
-  const points = reduceMotion.matches ? 24 : 48;
-  const energy = dataArray.reduce((sum, value) => sum + value, 0) / (dataArray.length * 255);
-  const amplitude = reduceMotion.matches ? 4 : 5 + energy * 18;
+function followValue(current, target, dt, attack, release) {
+  const speed = target > current ? attack : release;
+  const amount = 1 - Math.exp(-dt / speed);
+  return current + (target - current) * amount;
+}
 
-  [0, 1, 2].forEach(layer => {
-    ctx.beginPath();
-    for (let i = 0; i <= points; i++) {
-      const x = (i / points) * width;
-      const sampleIndex = Math.min(dataArray.length - 1, Math.floor((i / points) * dataArray.length));
-      const sample = dataArray[sampleIndex] / 255;
-      const phase = (i / points) * Math.PI * (2.2 + layer * .35) + layer * 1.4;
-      const y = center + Math.sin(phase) * (amplitude * (.48 + sample)) + (layer - 1) * 8;
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = layer === 1 ? 'rgba(255,247,240,.82)' : 'rgba(255,216,195,.36)';
-    ctx.lineWidth = layer === 1 ? 1.6 : 1;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-  });
+function sampleVisualizerAudio(dt) {
+  let targets = [0, 0, 0];
+  let rawEnergy = 0;
+  if (analyser && dataArray && !audio.paused && !audio.ended) {
+    analyser.getByteFrequencyData(dataArray);
+    const ranges = [[1, 12], [12, 38], [38, 92]];
+    targets = ranges.map(([start, end]) => {
+      let power = 0;
+      let count = 0;
+      for (let index = start; index < Math.min(end, dataArray.length); index++) {
+        power += dataArray[index] * dataArray[index];
+        count++;
+      }
+      return Math.min(1, Math.sqrt(power / Math.max(1, count)) / 175);
+    });
+    rawEnergy = Math.min(1, targets[0] * .48 + targets[1] * .37 + targets[2] * .15);
+  }
+  visualizerState.energy = followValue(visualizerState.energy, rawEnergy, dt, .32, .58);
+  visualizerState.bands = visualizerState.bands.map((value, index) =>
+    followValue(value, targets[index], dt, .34 + index * .04, .62)
+  );
+}
+
+function envelopeAt(x, layer, side) {
+  const taper = Math.pow(Math.max(0, Math.sin(Math.PI * x)), 1.72);
+  const phase = visualizerState.clock * (layer ? .68 : .84) + (layer ? 1.35 : 0);
+  const direction = side === 'upper' ? 1 : -1;
+  const broadShape = Math.max(.16, .55
+    + .28 * Math.sin(x * Math.PI * 2 + phase * direction)
+    + .22 * Math.sin(x * Math.PI * 4 - phase * .56)
+    + .12 * Math.cos(x * Math.PI * 6 + phase * .32 * direction));
+  const [low, mid, high] = visualizerState.bands;
+  const lowLobe = Math.exp(-Math.pow((x - .28) / .2, 2)) * low;
+  const midLobe = Math.exp(-Math.pow((x - .57) / .18, 2)) * mid;
+  const highLobe = Math.exp(-Math.pow((x - .76) / .14, 2)) * high;
+  const audioShape = .52 + lowLobe * .25 + midLobe * .2 + highLobe * .12;
+  const base = layer ? 4.4 : 2.8;
+  const response = layer ? 108 : 96;
+  const asymmetry = side === 'upper' ? 1 : .78;
+  const value = taper * (base + visualizerState.energy * response * broadShape * audioShape) * asymmetry;
+  const limit = side === 'upper' ? (layer ? 44 : 40) : (layer ? 35 : 32);
+  return limit * Math.tanh(value / limit);
+}
+
+function buildRibbon(width, center, layer) {
+  const steps = 72;
+  const upper = [];
+  const lower = [];
+  const envelope = [];
+  for (let index = 0; index <= steps; index++) {
+    const ratio = index / steps;
+    const x = ratio * width;
+    const up = envelopeAt(ratio, layer, 'upper');
+    const down = envelopeAt(ratio, layer, 'lower');
+    upper.push([x, center - up]);
+    lower.push([x, center + down]);
+    envelope.push(up + down);
+  }
+  return { upper, lower, envelope };
+}
+
+function fillRibbon(ribbon, gradient) {
+  ctx.beginPath();
+  ctx.moveTo(ribbon.upper[0][0], ribbon.upper[0][1]);
+  ribbon.upper.slice(1).forEach(point => ctx.lineTo(point[0], point[1]));
+  ribbon.lower.slice().reverse().forEach(point => ctx.lineTo(point[0], point[1]));
+  ctx.closePath();
+  ctx.fillStyle = gradient;
+  ctx.fill();
+}
+
+function drawFlowingRibbons(width, height) {
+  const theme = document.documentElement.dataset.theme;
+  const center = height / 2;
+  const backgroundRibbon = buildRibbon(width, center + 3.5, 1);
+  const foregroundRibbon = buildRibbon(width, center, 0);
+
+  const backgroundGradient = ctx.createLinearGradient(0, 0, width, 0);
+  const foregroundGradient = ctx.createLinearGradient(0, 0, width, 0);
+  if (theme === 'sienna') {
+    backgroundGradient.addColorStop(0, 'rgba(111,45,39,.08)');
+    backgroundGradient.addColorStop(.34, 'rgba(128,52,48,.38)');
+    backgroundGradient.addColorStop(.72, 'rgba(244,132,94,.34)');
+    backgroundGradient.addColorStop(1, 'rgba(111,45,39,.08)');
+    foregroundGradient.addColorStop(0, 'rgba(159,65,53,.34)');
+    foregroundGradient.addColorStop(.3, 'rgba(239,116,79,.72)');
+    foregroundGradient.addColorStop(.56, 'rgba(255,190,130,.78)');
+    foregroundGradient.addColorStop(.76, 'rgba(210,81,76,.68)');
+    foregroundGradient.addColorStop(1, 'rgba(159,65,53,.34)');
+  } else {
+    backgroundGradient.addColorStop(0, 'rgba(92,23,139,.1)');
+    backgroundGradient.addColorStop(.38, 'rgba(112,31,178,.4)');
+    backgroundGradient.addColorStop(.72, 'rgba(214,0,255,.34)');
+    backgroundGradient.addColorStop(1, 'rgba(92,23,139,.1)');
+    foregroundGradient.addColorStop(0, 'rgba(172,22,112,.34)');
+    foregroundGradient.addColorStop(.3, 'rgba(255,45,138,.76)');
+    foregroundGradient.addColorStop(.58, 'rgba(238,73,188,.76)');
+    foregroundGradient.addColorStop(.78, 'rgba(169,44,230,.68)');
+    foregroundGradient.addColorStop(1, 'rgba(112,28,166,.34)');
+  }
+  fillRibbon(backgroundRibbon, backgroundGradient);
+  fillRibbon(foregroundRibbon, foregroundGradient);
+
+}
+
+function renderVisualizer(timestamp, sampleAudio) {
+  const dimensions = resizeVisualizerCanvas();
+  const rawDt = visualizerState.lastTime ? (timestamp - visualizerState.lastTime) / 1000 : 1 / 60;
+  const dt = Math.max(1 / 120, Math.min(.05, rawDt));
+  visualizerState.lastTime = timestamp;
+  if (sampleAudio) sampleVisualizerAudio(dt);
+  if (!reduceMotion.matches) visualizerState.clock += dt * (audio.paused ? .1 : .34);
+  ctx.clearRect(0, 0, dimensions.width, dimensions.height);
+  drawFlowingRibbons(dimensions.width, dimensions.height);
+}
+
+function visualizerLoop(timestamp) {
+  visualizerFrame = null;
+  if (document.hidden || !visualizerStarted) return;
+  renderVisualizer(timestamp, true);
+  if (!reduceMotion.matches) visualizerFrame = requestAnimationFrame(visualizerLoop);
+}
+
+function startVisualizerLoop() {
+  if (!visualizerStarted || document.hidden || visualizerFrame !== null) return;
+  visualizerState.lastTime = 0;
+  if (reduceMotion.matches) {
+    renderVisualizer(performance.now(), true);
+  } else {
+    visualizerFrame = requestAnimationFrame(visualizerLoop);
+  }
 }
 
 function paintIdleVisualizer() {
-  if (visualizerStarted || document.hidden) return;
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-  const width = Math.max(1, canvas.offsetWidth);
-  const height = Math.max(1, canvas.offsetHeight);
-  canvas.width = Math.round(width * pixelRatio);
-  canvas.height = Math.round(height * pixelRatio);
-  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-  ctx.clearRect(0, 0, width, height);
-  if (document.documentElement.dataset.theme === 'sienna') {
-    const idleData = dataArray;
-    dataArray = new Uint8Array(64);
-    drawSiennaWaves(width, height);
-    dataArray = idleData;
+  if (document.hidden) return;
+  if (visualizerStarted) {
+    if (reduceMotion.matches) renderVisualizer(performance.now(), true);
+    return;
   }
+  visualizerState.lastTime = 0;
+  visualizerState.energy = 0;
+  visualizerState.bands = [0, 0, 0];
+  renderVisualizer(performance.now(), false);
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && visualizerStarted && !visualizerFrame) drawVisualizer();
-  if (!document.hidden && !visualizerStarted) paintIdleVisualizer();
+  if (document.hidden) {
+    if (visualizerFrame !== null) cancelAnimationFrame(visualizerFrame);
+    visualizerFrame = null;
+    visualizerState.lastTime = 0;
+  } else if (visualizerStarted) {
+    startVisualizerLoop();
+  } else {
+    paintIdleVisualizer();
+  }
 });
-document.addEventListener('raventhemechange', paintIdleVisualizer);
-window.addEventListener('resize', paintIdleVisualizer, { passive: true });
+document.addEventListener('freeze', () => {
+  if (visualizerFrame !== null) cancelAnimationFrame(visualizerFrame);
+  visualizerFrame = null;
+  visualizerState.lastTime = 0;
+});
+document.addEventListener('resume', () => {
+  if (visualizerFrame !== null) cancelAnimationFrame(visualizerFrame);
+  visualizerFrame = null;
+  visualizerState.lastTime = 0;
+  if (visualizerStarted) startVisualizerLoop(); else paintIdleVisualizer();
+});
+document.addEventListener('raventhemechange', () => {
+  if (!visualizerStarted || reduceMotion.matches) paintIdleVisualizer();
+});
+window.addEventListener('resize', () => {
+  if (!visualizerStarted || reduceMotion.matches) paintIdleVisualizer();
+}, { passive: true });
+reduceMotion.addEventListener('change', () => {
+  if (visualizerFrame !== null) cancelAnimationFrame(visualizerFrame);
+  visualizerFrame = null;
+  visualizerState.lastTime = 0;
+  if (visualizerStarted) startVisualizerLoop(); else paintIdleVisualizer();
+});
+audio.addEventListener('play', startVisualizerLoop);
+audio.addEventListener('pause', () => {
+  if (reduceMotion.matches) renderVisualizer(performance.now(), true);
+});
 
 // Инициализация
 loadTrack(0);
