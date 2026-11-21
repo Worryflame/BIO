@@ -210,6 +210,29 @@
   50% { opacity: 1; height: 35px; }
 } 
 
+html[data-theme="glitch"] .hero__scroll-line {
+  position: relative;
+  width: 1px;
+  height: 30px;
+  overflow: hidden;
+  background: rgba(255,45,138,.22);
+  animation: none;
+}
+html[data-theme="glitch"] .hero__scroll-line::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 48%;
+  background: linear-gradient(180deg, rgba(214,0,255,0), #d600ff 42%, #ff2d8a 68%, rgba(255,45,138,0));
+  transform: translateY(-120%);
+  animation: glitchScrollShimmer 3.1s linear infinite;
+}
+@keyframes glitchScrollShimmer {
+  from { transform: translateY(-120%); }
+  to { transform: translateY(330%); }
+}
+
   /* ---- MAIN CONTENT ---- */
   .content {
     max-width: 800px;
@@ -1295,6 +1318,10 @@ a:focus-visible,
     animation: none !important;
     transform: translateY(42%);
   }
+  html[data-theme="glitch"] .hero__scroll-line::before {
+    animation: none !important;
+    transform: translateY(54%);
+  }
 }
   
 </style>
@@ -2278,6 +2305,7 @@ let currentTrack = 0;
 let audioCtx, analyser, source, dataArray, bufferLength;
 let visualizerStarted = false;
 let visualizerFrame = null;
+let autoAdvanceTimer = null;
 
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
@@ -2322,6 +2350,7 @@ function loadTrack(index) {
 }
 
 function loadAndPlay() {
+  cancelPendingAutoAdvance();
   loadTrack(currentTrack);
   audio.play();
   playBtn.textContent = '❚❚';
@@ -2329,8 +2358,15 @@ function loadAndPlay() {
   initVisualizer();
 }
 
+function cancelPendingAutoAdvance() {
+  if (autoAdvanceTimer !== null) clearTimeout(autoAdvanceTimer);
+  autoAdvanceTimer = null;
+  visualizerState.forceCollapse = false;
+}
+
 // Play/Pause
 playBtn.addEventListener('click', () => {
+  cancelPendingAutoAdvance();
   if (audio.paused) {
     if (!audio.src || audio.src === window.location.href) loadTrack(currentTrack);
     audio.play();
@@ -2355,8 +2391,15 @@ nextBtn.addEventListener('click', () => {
 });
 
 audio.addEventListener('ended', () => {
-  currentTrack = (currentTrack + 1) % tracks.length;
-  loadAndPlay();
+  if (autoAdvanceTimer !== null) clearTimeout(autoAdvanceTimer);
+  visualizerState.forceCollapse = true;
+  startVisualizerLoop();
+  autoAdvanceTimer = setTimeout(() => {
+    autoAdvanceTimer = null;
+    currentTrack = (currentTrack + 1) % tracks.length;
+    visualizerState.forceCollapse = false;
+    loadAndPlay();
+  }, 2200);
 });
 
 // Прогресс
@@ -2415,7 +2458,9 @@ const visualizerState = {
   energy: 0,
   bands: [0, 0, 0],
   clock: 0,
-  lastTime: 0
+  lastTime: 0,
+  glitchReveal: 0,
+  forceCollapse: false
 };
 
 function initVisualizer() {
@@ -2427,7 +2472,7 @@ function initVisualizer() {
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
     analyser.fftSize = 256;
-    analyser.smoothingTimeConstant = 0.9;
+    analyser.smoothingTimeConstant = 0.82;
     bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
   }
@@ -2470,43 +2515,51 @@ function sampleVisualizerAudio(dt) {
     });
     rawEnergy = Math.min(1, targets[0] * .48 + targets[1] * .37 + targets[2] * .15);
   }
-  visualizerState.energy = followValue(visualizerState.energy, rawEnergy, dt, .32, .58);
+  visualizerState.energy = followValue(visualizerState.energy, rawEnergy, dt, .18, .38);
   visualizerState.bands = visualizerState.bands.map((value, index) =>
-    followValue(value, targets[index], dt, .34 + index * .04, .62)
+    followValue(value, targets[index], dt, .2 + index * .025, .42)
   );
+  const glitchTarget = document.documentElement.dataset.theme === 'glitch'
+    && !audio.paused && !audio.ended && !visualizerState.forceCollapse ? 1 : 0;
+  visualizerState.glitchReveal = reduceMotion.matches
+    ? glitchTarget
+    : followValue(visualizerState.glitchReveal, glitchTarget, dt, .72,
+      visualizerState.forceCollapse ? .4 : .58);
 }
 
-function envelopeAt(x, layer, side) {
-  const taper = Math.pow(Math.max(0, Math.sin(Math.PI * x)), 1.72);
-  const phase = visualizerState.clock * (layer ? .68 : .84) + (layer ? 1.35 : 0);
+function liquidRadiusAt(x, layer, side) {
+  const taper = Math.pow(Math.sin(Math.PI * x), 2);
+  const phase = visualizerState.clock * (layer ? .72 : .9) + (layer ? 1.15 : 0);
   const direction = side === 'upper' ? 1 : -1;
-  const broadShape = Math.max(.16, .55
-    + .28 * Math.sin(x * Math.PI * 2 + phase * direction)
-    + .22 * Math.sin(x * Math.PI * 4 - phase * .56)
-    + .12 * Math.cos(x * Math.PI * 6 + phase * .32 * direction));
+  const fluidShape = .64
+    + .22 * Math.sin(x * Math.PI * 2 + phase * direction)
+    + .14 * Math.cos(x * Math.PI * 4 - phase * .42)
+    + .07 * Math.sin(x * Math.PI * 6 + phase * .25 * direction);
   const [low, mid, high] = visualizerState.bands;
-  const lowLobe = Math.exp(-Math.pow((x - .28) / .2, 2)) * low;
-  const midLobe = Math.exp(-Math.pow((x - .57) / .18, 2)) * mid;
-  const highLobe = Math.exp(-Math.pow((x - .76) / .14, 2)) * high;
-  const audioShape = .52 + lowLobe * .25 + midLobe * .2 + highLobe * .12;
-  const base = layer ? 4.4 : 2.8;
-  const response = layer ? 108 : 96;
-  const asymmetry = side === 'upper' ? 1 : .78;
-  const value = taper * (base + visualizerState.energy * response * broadShape * audioShape) * asymmetry;
-  const limit = side === 'upper' ? (layer ? 44 : 40) : (layer ? 35 : 32);
+  const lowLobe = Math.exp(-Math.pow((x - .27) / .24, 2)) * low;
+  const midLobe = Math.exp(-Math.pow((x - .56) / .23, 2)) * mid;
+  const highLobe = Math.exp(-Math.pow((x - .77) / .19, 2)) * high;
+  const audioShape = .52 + lowLobe * .28 + midLobe * .24 + highLobe * .14;
+  const base = layer ? 6 : 4;
+  const response = layer ? 92 : 82;
+  const asymmetry = side === 'upper' ? 1 : .82;
+  const value = taper * (base + visualizerState.energy * response * fluidShape * audioShape) * asymmetry;
+  const limit = side === 'upper' ? (layer ? 41 : 37) : (layer ? 34 : 30);
   return limit * Math.tanh(value / limit);
 }
 
-function buildRibbon(width, center, layer) {
-  const steps = 72;
+function buildLiquidLayer(width, center, layer) {
+  const steps = 14;
+  const inset = Math.min(24, width * .06);
+  const liquidWidth = width - inset * 2;
   const upper = [];
   const lower = [];
   const envelope = [];
   for (let index = 0; index <= steps; index++) {
     const ratio = index / steps;
-    const x = ratio * width;
-    const up = envelopeAt(ratio, layer, 'upper');
-    const down = envelopeAt(ratio, layer, 'lower');
+    const x = inset + ratio * liquidWidth;
+    const up = liquidRadiusAt(ratio, layer, 'upper');
+    const down = liquidRadiusAt(ratio, layer, 'lower');
     upper.push([x, center - up]);
     lower.push([x, center + down]);
     envelope.push(up + down);
@@ -2514,47 +2567,105 @@ function buildRibbon(width, center, layer) {
   return { upper, lower, envelope };
 }
 
-function fillRibbon(ribbon, gradient) {
+function traceSmoothContour(points, reverse = false) {
+  const ordered = reverse ? points.slice().reverse() : points;
+  for (let index = 0; index < ordered.length - 1; index++) {
+    const previous = ordered[Math.max(0, index - 1)];
+    const current = ordered[index];
+    const next = ordered[index + 1];
+    const after = ordered[Math.min(ordered.length - 1, index + 2)];
+    ctx.bezierCurveTo(
+      current[0] + (next[0] - previous[0]) / 6,
+      current[1] + (next[1] - previous[1]) / 6,
+      next[0] - (after[0] - current[0]) / 6,
+      next[1] - (after[1] - current[1]) / 6,
+      next[0], next[1]
+    );
+  }
+}
+
+function fillLiquidLayer(layer, gradient) {
   ctx.beginPath();
-  ctx.moveTo(ribbon.upper[0][0], ribbon.upper[0][1]);
-  ribbon.upper.slice(1).forEach(point => ctx.lineTo(point[0], point[1]));
-  ribbon.lower.slice().reverse().forEach(point => ctx.lineTo(point[0], point[1]));
+  ctx.moveTo(layer.upper[0][0], layer.upper[0][1]);
+  traceSmoothContour(layer.upper);
+  traceSmoothContour(layer.lower, true);
   ctx.closePath();
   ctx.fillStyle = gradient;
   ctx.fill();
 }
 
-function drawFlowingRibbons(width, height) {
-  const theme = document.documentElement.dataset.theme;
+function drawSiennaLiquid(width, height) {
   const center = height / 2;
-  const backgroundRibbon = buildRibbon(width, center + 3.5, 1);
-  const foregroundRibbon = buildRibbon(width, center, 0);
+  const backgroundLayer = buildLiquidLayer(width, center + 3, 1);
+  const foregroundLayer = buildLiquidLayer(width, center, 0);
 
   const backgroundGradient = ctx.createLinearGradient(0, 0, width, 0);
   const foregroundGradient = ctx.createLinearGradient(0, 0, width, 0);
-  if (theme === 'sienna') {
-    backgroundGradient.addColorStop(0, 'rgba(111,45,39,.08)');
-    backgroundGradient.addColorStop(.34, 'rgba(128,52,48,.38)');
-    backgroundGradient.addColorStop(.72, 'rgba(244,132,94,.34)');
-    backgroundGradient.addColorStop(1, 'rgba(111,45,39,.08)');
-    foregroundGradient.addColorStop(0, 'rgba(159,65,53,.34)');
-    foregroundGradient.addColorStop(.3, 'rgba(239,116,79,.72)');
-    foregroundGradient.addColorStop(.56, 'rgba(255,190,130,.78)');
-    foregroundGradient.addColorStop(.76, 'rgba(210,81,76,.68)');
-    foregroundGradient.addColorStop(1, 'rgba(159,65,53,.34)');
-  } else {
-    backgroundGradient.addColorStop(0, 'rgba(92,23,139,.1)');
-    backgroundGradient.addColorStop(.38, 'rgba(112,31,178,.4)');
-    backgroundGradient.addColorStop(.72, 'rgba(214,0,255,.34)');
-    backgroundGradient.addColorStop(1, 'rgba(92,23,139,.1)');
-    foregroundGradient.addColorStop(0, 'rgba(172,22,112,.34)');
-    foregroundGradient.addColorStop(.3, 'rgba(255,45,138,.76)');
-    foregroundGradient.addColorStop(.58, 'rgba(238,73,188,.76)');
-    foregroundGradient.addColorStop(.78, 'rgba(169,44,230,.68)');
-    foregroundGradient.addColorStop(1, 'rgba(112,28,166,.34)');
-  }
-  fillRibbon(backgroundRibbon, backgroundGradient);
-  fillRibbon(foregroundRibbon, foregroundGradient);
+  backgroundGradient.addColorStop(0, 'rgba(111,45,39,.08)');
+  backgroundGradient.addColorStop(.34, 'rgba(128,52,48,.38)');
+  backgroundGradient.addColorStop(.72, 'rgba(244,132,94,.34)');
+  backgroundGradient.addColorStop(1, 'rgba(111,45,39,.08)');
+  foregroundGradient.addColorStop(0, 'rgba(159,65,53,.34)');
+  foregroundGradient.addColorStop(.3, 'rgba(239,116,79,.72)');
+  foregroundGradient.addColorStop(.56, 'rgba(255,190,130,.78)');
+  foregroundGradient.addColorStop(.76, 'rgba(210,81,76,.68)');
+  foregroundGradient.addColorStop(1, 'rgba(159,65,53,.34)');
+  fillLiquidLayer(backgroundLayer, backgroundGradient);
+  fillLiquidLayer(foregroundLayer, foregroundGradient);
+}
+
+function roundedCapsule(x, y, width, height, color, alpha) {
+  const radius = Math.min(width, height) / 2;
+  ctx.beginPath();
+  ctx.roundRect(x - width / 2, y - height / 2, width, height, radius);
+  ctx.fillStyle = color;
+  ctx.globalAlpha = alpha;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 6;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur = 0;
+}
+
+function getGlitchCapsules(width, height) {
+  const reveal = Math.max(0, Math.min(1, visualizerState.glitchReveal));
+  const smoothstep = value => value * value * (3 - 2 * value);
+  const fadeProgress = Math.max(0, Math.min(1, reveal / .08));
+  const unfoldProgress = Math.max(0, Math.min(1, (reveal - .18) / .82));
+  const visibility = smoothstep(fadeProgress);
+  const spread = smoothstep(unfoldProgress);
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const spacing = Math.min(42, width / 9.4);
+  const targetWidth = Math.min(18, width / 22);
+  const dotSize = 4;
+  const profiles = [.36, .56, .76, 1, .82, .6, .4];
+  const colors = ['#d600ff', '#ff2d8a', '#d600ff', '#ff2d8a', '#d600ff', '#ff2d8a', '#d600ff'];
+  const bandInfluence = [visualizerState.bands[2], visualizerState.bands[1], visualizerState.bands[0]];
+  return profiles.map((profile, index) => {
+    const distance = index - 3;
+    const band = bandInfluence[Math.min(2, Math.abs(distance))];
+    const travelingPeak = .5 + .5 * Math.sin(visualizerState.clock * 2.85 - index * 1.12);
+    const breathing = .5 + .5 * Math.sin(visualizerState.clock * 1.42 + index * .68 + .8);
+    const authoredMotion = Math.pow(travelingPeak, 2.1) * .72 + breathing * .28;
+    const targetHeight = 8 + profile * 10 + authoredMotion * 48
+      + visualizerState.energy * 10 + band * 8;
+    return {
+      x: centerX + distance * spacing * spread,
+      y: centerY,
+      width: dotSize + (targetWidth - dotSize) * spread,
+      height: dotSize + (targetHeight - dotSize) * spread,
+      color: colors[index],
+      alpha: visibility * (.24 + .76 * spread)
+    };
+  });
+}
+
+function drawGlitchCapsules(width, height) {
+  if (visualizerState.glitchReveal <= .006) return;
+  getGlitchCapsules(width, height).forEach(capsule =>
+    roundedCapsule(capsule.x, capsule.y, capsule.width, capsule.height, capsule.color, capsule.alpha)
+  );
 
 }
 
@@ -2564,16 +2675,29 @@ function renderVisualizer(timestamp, sampleAudio) {
   const dt = Math.max(1 / 120, Math.min(.05, rawDt));
   visualizerState.lastTime = timestamp;
   if (sampleAudio) sampleVisualizerAudio(dt);
-  if (!reduceMotion.matches) visualizerState.clock += dt * (audio.paused ? .1 : .34);
+  if (!reduceMotion.matches && !audio.paused) {
+    visualizerState.clock += dt * (1.65 + visualizerState.energy * 1.7);
+  }
   ctx.clearRect(0, 0, dimensions.width, dimensions.height);
-  drawFlowingRibbons(dimensions.width, dimensions.height);
+  if (document.documentElement.dataset.theme === 'sienna') {
+    drawSiennaLiquid(dimensions.width, dimensions.height);
+  } else {
+    drawGlitchCapsules(dimensions.width, dimensions.height);
+  }
+}
+
+function visualizerNeedsAnotherFrame() {
+  if (!audio.paused && !audio.ended) return true;
+  return visualizerState.energy > .003 || visualizerState.glitchReveal > .003;
 }
 
 function visualizerLoop(timestamp) {
   visualizerFrame = null;
   if (document.hidden || !visualizerStarted) return;
   renderVisualizer(timestamp, true);
-  if (!reduceMotion.matches) visualizerFrame = requestAnimationFrame(visualizerLoop);
+  if (!reduceMotion.matches && visualizerNeedsAnotherFrame()) {
+    visualizerFrame = requestAnimationFrame(visualizerLoop);
+  }
 }
 
 function startVisualizerLoop() {
@@ -2595,6 +2719,7 @@ function paintIdleVisualizer() {
   visualizerState.lastTime = 0;
   visualizerState.energy = 0;
   visualizerState.bands = [0, 0, 0];
+  visualizerState.glitchReveal = 0;
   renderVisualizer(performance.now(), false);
 }
 
@@ -2621,7 +2746,7 @@ document.addEventListener('resume', () => {
   if (visualizerStarted) startVisualizerLoop(); else paintIdleVisualizer();
 });
 document.addEventListener('raventhemechange', () => {
-  if (!visualizerStarted || reduceMotion.matches) paintIdleVisualizer();
+  if (visualizerStarted) startVisualizerLoop(); else paintIdleVisualizer();
 });
 window.addEventListener('resize', () => {
   if (!visualizerStarted || reduceMotion.matches) paintIdleVisualizer();
