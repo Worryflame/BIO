@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+  html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #333 #0a0a0a; }
+
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ---- GRAIN OVERLAY ---- */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  /* ---- PINK GLITCH KEYFRAMES ---- */
+  @keyframes glitch {
+    0% { text-shadow: 2px 0 #ff2d8a, -2px 0 #d600ff; transform: translate(0); }
+    15% { text-shadow: -3px 0 #ff2d8a, 3px 0 #d600ff; transform: translate(2px, -1px); }
+    30% { text-shadow: 3px -2px #ff2d8a, -3px 2px #d600ff; transform: translate(-1px, 2px); }
+    45% { text-shadow: -2px 2px #ff2d8a, 2px -2px #d600ff; transform: translate(1px, 1px); }
+    60% { text-shadow: 2px 1px #ff2d8a, -2px -1px #d600ff; transform: translate(-2px, -1px); }
+    75% { text-shadow: -1px -1px #ff2d8a, 1px 1px #d600ff; transform: translate(0px, 2px); }
+    100% { text-shadow: 2px 0 #ff2d8a, -2px 0 #d600ff; transform: translate(0); }
+  }
+
+  @keyframes glitchSmall {
+    0%, 100% { text-shadow: 1px 0 #ff2d8a, -1px 0 #d600ff; }
+    25% { text-shadow: -1px 1px #ff2d8a, 1px -1px #d600ff; }
+    50% { text-shadow: 1px -1px #ff2d8a, -1px 1px #d600ff; }
+    75% { text-shadow: -1px 0 #ff2d8a, 1px 0 #d600ff; }
+  }
+
+  @keyframes glitchLine {
+    0%, 100% { opacity: 0; }
+    48% { opacity: 0; }
+    50% { opacity: 0.8; }
+    52% { opacity: 0; }
+    70% { opacity: 0; }
+    71% { opacity: 0.6; }
+    72% { opacity: 0; }
+  }
+
+  @keyframes glitchBg {
+    0%, 100% { background-position: 0 0; }
+    20% { background-position: -2px 1px; }
+    40% { background-position: 1px -1px; }
+    60% { background-position: -1px 2px; }
+    80% { background-position: 2px 0; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes quoteGlitch {
+    0%, 90%, 100% { text-shadow: none; opacity: 0.5; }
+    92% { text-shadow: 2px 0 #ff2d8a, -2px 0 #d600ff; opacity: 0.7; }
+    94% { text-shadow: -1px 1px #ff2d8a, 1px -1px #d600ff; opacity: 0.4; }
+    96% { text-shadow: 1px -1px #ff2d8a, -1px 1px #d600ff; opacity: 0.8; }
+    98% { text-shadow: none; opacity: 0.5; }
+  }
+
+  @keyframes scanline {
+    0% { top: -5%; }
+    100% { top: 105%; }
+  }
+
+  /* ---- GLOBAL GLITCH CLASS ---- */
+  .glitching {
+    animation: glitchSmall 0.15s ease-in-out !important;
+  }
+
+  /* ---- SCANLINE OVERLAY ---- */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -5%;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 20%, rgba(255, 45, 138, 0.15) 50%, transparent 80%);
+    pointer-events: none;
+    z-index: 9998;
+    animation: scanline 4s linear infinite;
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .hero__play {
+    font-size: 1rem;
+    color: #ff2d8a;
+    letter-spacing: 0.5em;
+    margin-bottom: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .hero__name {
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #fff;
+    position: relative;
+    cursor: default;
+  }
+
+  .hero__name:hover {
+    animation: glitch 0.3s ease-in-out;
+  }
+
+  .hero__tagline {
+    font-size: clamp(0.75rem, 2vw, 1rem);
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #666;
+    margin-top: 1.2rem;
+  }
+
+  .hero__quote {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #666;
+    letter-spacing: 0.1em;
+    margin-top: 2rem;
+    max-width: 500px;
+    animation: quoteGlitch 6s ease-in-out infinite;
+    transition: opacity 0.5s;
+  }
+
+  .hero__divider {
+    width: 60px;
+    height: 1px;
+    background: #333;
+    margin: 2rem auto;
+  }
+
+.hero__scroll {
+  position: absolute;
+  bottom: 2rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero__scroll-line {
+  width: 1px;
+  height: 30px;
+  background: linear-gradient(180deg, #ff2d8a, transparent);
+  animation: scrollPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; height: 20px; }
+  50% { opacity: 1; height: 35px; }
+} 
+
+  /* ---- MAIN CONTENT ---- */
+  .content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ---- SECTION QUOTE (between sections) ---- */
+  .section-quote {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    padding: 1.5rem 0;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    margin-bottom: 2rem;
+    animation: quoteGlitch 8s ease-in-out infinite;
+  }
+
+  /* ---- TABS NAV ---- */
+  .tabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border-bottom: 1px solid #222;
+    margin-bottom: 2rem;
+  }
+
+  .tabs-nav__btn {
+    background: none;
+    border: none;
+    color: #555;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.8rem 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s, background 0.3s;
+    position: relative;
+  }
+
+  .tabs-nav__btn:hover {
+    background: #ff2d8a;
+    color: #0a0a0a;
+  }
+
+  .tabs-nav__btn.active {
+    color: #fff;
+  }
+
+  .tabs-nav__btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: #ff2d8a;
+  }
+
+  /* ---- TAB PANELS ---- */
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  /* ---- SUB-TABS ---- */
+  .subtabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .subtabs-nav__btn {
+    background: transparent;
+    border: 1px solid #333;
+    color: #666;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .subtabs-nav__btn:hover {
+    background: #ff2d8a;
+    color: #0a0a0a;
+    border-color: #ff2d8a;
+  }
+
+  .subtabs-nav__btn.active {
+    background: #ff2d8a;
+    color: #0a0a0a;
+    border-color: #ff2d8a;
+  }
+
+  /* ---- SUBTAB PANELS ---- */
+  .subtab-panel {
+    display: none;
+  }
+
+  .subtab-panel.active {
+    display: block;
+  }
+
+  /* ---- TYPOGRAPHY ---- */
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 0.8rem;
+  }
+
+  p, li {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: #1a1a1a;
+    margin: 2rem 0;
+  }
+
+  /* ---- PLACEHOLDER IMAGES ---- */
+  .placeholder-img {
+    width: 100%;
+    max-width: 400px;
+    height: 250px;
+    background: #161616;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 1.5rem 0;
+  }
+
+  /* ---- LOVE LIST ---- */
+  .love-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .love-list li {
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .love-list li a {
+    color: #aaa;
+    text-decoration: none;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .love-list li a:hover {
+    color: #ff2d8a;
+  }
+
+  .heart {
+    color: #555;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: color 0.3s;
+  }
+
+  .love-list li a:hover .heart {
+    color: #ff2d8a;
+  }
+
+  /* ---- SPOTIFY EMBED ---- */
+  .spotify-wrap {
+    margin-top: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .spotify-wrap iframe {
+    width: 100%;
+    border: none;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  .social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #333;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .social-icons a:hover {
+    background: #ff2d8a;
+    border-color: #ff2d8a;
+  }
+
+  .social-icons a:hover svg {
+    fill: #0a0a0a;
+  }
+
+  .social-icons svg {
+    width: 18px;
+    height: 18px;
+    fill: #666;
+    transition: fill 0.3s;
+  }
+
+  .footer-quote {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: #444;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+    animation: quoteGlitch 7s ease-in-out infinite;
+  }
+
+  .footer-copy {
+    font-size: 0.65rem;
+    color: #333;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* ---- GLITCH LINES (decorative, multiple) ---- */
+  .glitch-line {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff2d8a, #d600ff, transparent);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9998;
+    animation: glitchLine 5s ease-in-out infinite;
+  }
+
+  .glitch-line:nth-child(1) { top: 0; animation-delay: 0s; }
+  .glitch-line:nth-child(2) { top: 33%; animation-delay: 1.8s; }
+  .glitch-line:nth-child(3) { top: 66%; animation-delay: 3.5s; }
+
+  /* ---- FADE-IN ON SCROLL ---- */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 600px) {
+    .tabs-nav__btn { padding: 0.6rem 0.8rem; font-size: 0.7rem; }
+    .subtabs-nav__btn { padding: 0.4rem 0.7rem; font-size: 0.65rem; }
+    h2 { font-size: 1.4rem; }
+    .placeholder-img { height: 180px; }
+  }
+  
+  /* ---- BIO LINE ---- */
+  .bio-line {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ---- ABOUT LIST ---- */
+  .about-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .about-list li {
+    position: relative;
+    padding-left: 1.2rem;
+    margin-bottom: 0.8rem;
+    color: #aaa;
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+
+  .about-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #ff2d8a;
+    font-weight: 700;
+  }
+
+  .accent {
+    color: #ff2d8a;
+    font-weight: 700;
+  }
+
+  /* ---- COLLAPSIBLE ---- */
+  .collapsible {
+    background: none;
+    border: 1px solid #222;
+    color: #555;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    margin: 1rem 0 0.5rem;
+    transition: all 0.3s;
+    display: block;
+  }
+
+  .collapsible:hover {
+    background: #ff2d8a;
+    color: #0a0a0a;
+    border-color: #ff2d8a;
+  }
+
+  .collapsible.open {
+    border-color: #ff2d8a;
+    color: #ff2d8a;
+  }
+
+  .collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, padding 0.5s ease;
+    padding: 0;
+  }
+
+  .collapsible-content.open {
+    max-height: 800px;
+    padding: 0.8rem 0;
+  }
+
+  /* ---- EASTER EGG ---- */
+  .easter-egg-trigger {
+    color: #555;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    margin-top: 0.5rem;
+  }
+
+  .easter-egg-trigger:hover {
+    color: #ff2d8a;
+  }
+
+  .easter-egg-hidden {
+    color: #ff2d8a;
+    font-size: 0.8rem;
+    font-style: italic;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    margin-top: 0.3rem;
+  }
+
+  .easter-egg-hidden.revealed {
+    max-height: 60px;
+    opacity: 1;
+  }
+
+  /* ---- KIN LIST ---- */
+  .kin-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .kin-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #151515;
+  }
+
+  .kin-name {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .kin-source {
+    color: #555;
+    font-size: 0.75rem;
+    font-style: italic;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---- FANDOM GRID ---- */
+  .fandom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 600px) {
+    .fandom-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+  }
+
+  .fandom-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .fandom-list li {
+    padding: 0.4rem 0;
+    color: #aaa;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #131313;
+    transition: color 0.3s;
+  }
+
+  .fandom-list li:hover {
+    color: #ff2d8a;
+  }
+
+  /* ---- MUTED NOTE ---- */
+  .muted-note {
+    color: #444;
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 1.5rem;
+  }
+
+  .muted-inline {
+    color: #444;
+    font-size: 0.8em;
+  }
+
+  /* ---- DNI BLOCKQUOTE ---- */
+  .dni-note {
+    border-left: 2px solid #222;
+    padding: 1rem 1.2rem;
+    margin-top: 1.5rem;
+    color: #444;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    font-style: italic;
+  }
+  
+  /* ---- CONTACT CARDS ---- */
+  .contact-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .contact-card {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1.4rem;
+    border: 1px solid #222;
+    background: #111;
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .contact-card:hover {
+    border-color: #ff2d8a;
+    background: #1a0a12;
+    color: #fff;
+  }
+
+  .contact-icon {
+    font-size: 1.2rem;
+  }
+
+  .contact-label {
+    flex: 1;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  .contact-arrow {
+    color: #333;
+    transition: color 0.3s, transform 0.3s;
+  }
+
+  .contact-card:hover .contact-arrow {
+    color: #ff2d8a;
+    transform: translateX(3px);
+  }
+
+  /* ---- LINK BUTTONS ROW ---- */
+  .link-buttons {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .link-btn {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid #333;
+    background: transparent;
+    color: #888;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .link-btn:hover {
+    background: #ff2d8a;
+    color: #0a0a0a;
+    border-color: #ff2d8a;
+  }
+
+/* ---- QUOTE GLITCH BURST ---- */
+@keyframes quoteBurst {
+  0% { text-shadow: 0 0 transparent; transform: translate(0); }
+  10% { text-shadow: 4px 0 #ff2d8a, -4px 0 #d600ff; transform: translate(-3px, 2px); }
+  20% { text-shadow: -3px -2px #ff2d8a, 3px 2px #d600ff; transform: translate(3px, -1px); }
+  30% { text-shadow: 2px 3px #ff2d8a, -2px -3px #d600ff; transform: translate(-2px, 3px); }
+  40% { text-shadow: -4px 1px #ff2d8a, 4px -1px #d600ff; transform: translate(4px, -2px); }
+  50% { text-shadow: 3px -3px #ff2d8a, -3px 3px #d600ff; transform: translate(-1px, 1px); }
+  60% { text-shadow: -2px 2px #ff2d8a, 2px -2px #d600ff; transform: translate(2px, -3px); }
+  80% { text-shadow: 1px 0 #ff2d8a, -1px 0 #d600ff; transform: translate(-1px, 1px); }
+  100% { text-shadow: none; transform: translate(0); }
+}
+
+.quote-burst {
+  animation: quoteBurst 0.4s ease-in-out !important;
+}
+
+/* ---- SIDE WAVES ---- */
+.side-wave {
+  position: fixed;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9996;
+  opacity: 0;
+}
+
+.side-wave-left {
+  left: 0;
+  background: linear-gradient(180deg, transparent, #ff2d8a, #d600ff, #ff2d8a, transparent);
+}
+
+.side-wave-right {
+  right: 0;
+  background: linear-gradient(180deg, transparent, #d600ff, #ff2d8a, #d600ff, transparent);
+}
+
+@keyframes wavePulse {
+  0% { opacity: 0; transform: scaleY(0.3); }
+  30% { opacity: 0.6; transform: scaleY(1); }
+  60% { opacity: 0.3; transform: scaleY(0.7); }
+  100% { opacity: 0; transform: scaleY(0.2); }
+}
+
+.side-wave.active {
+  animation: wavePulse 0.6s ease-out forwards;
+}
+
+/* ---- MUSIC PLAYER ---- */
+.player {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  padding: 1.5rem;
+  border-top: 1px solid #1a1a1a;
+  position: relative;
+}
+
+.player__visualizer {
+  width: 100%;
+  height: 80px;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.player__lyrics {
+  text-align: center;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #ff2d8a;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  transition: opacity 0.3s;
+  text-shadow: 0 0 8px rgba(255, 45, 138, 0.3);
+}
+
+.player__controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.player__btn {
+  background: none;
+  border: 1px solid #333;
+  color: #888;
+  font-size: 0.9rem;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.player__btn:hover {
+  border-color: #ff2d8a;
+  color: #ff2d8a;
+}
+
+.player__btn--play {
+  width: 44px;
+  height: 44px;
+  font-size: 1.1rem;
+  border-color: #ff2d8a;
+  color: #ff2d8a;
+}
+
+.player__btn--play:hover {
+  background: #ff2d8a;
+  color: #0a0a0a;
+}
+
+.player__progress-wrap {
+  width: 100%;
+  height: 3px;
+  background: #1a1a1a;
+  cursor: pointer;
+  margin-bottom: 0.8rem;
+  position: relative;
+}
+
+.player__progress {
+  height: 100%;
+  background: #ff2d8a;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.player__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.player__title {
+  color: #aaa;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+.player__time {
+  color: #555;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+
+.player__playlist {
+  border-top: 1px solid #151515;
+  padding-top: 0.8rem;
+}
+
+.player__track {
+  padding: 0.5rem 0.3rem;
+  color: #555;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 0.3s;
+  border-bottom: 1px solid #111;
+  display: flex;
+  justify-content: space-between;
+}
+
+.player__track:hover {
+  color: #ff2d8a;
+}
+
+.player__track.active {
+  color: #ff2d8a;
+  font-weight: 700;
+}
+
+.player__track-num {
+  color: #333;
+  margin-right: 0.8rem;
+  font-size: 0.7rem;
+}
+  
+</style>
+</head>
+<body> 
+  
+<div class="glitch-line"></div>
+<div class="glitch-line"></div>
+<div class="glitch-line"></div>
+<div class="side-wave side-wave-left" id="waveLeft"></div>
+<div class="side-wave side-wave-right" id="waveRight"></div>
+<!-- ======== HERO ======== -->
+<section class="hero">
+  <div class="hero__play">▶ PLAY</div>
+  <h1 class="hero__name">RAVEN</h1>
+  <p class="hero__tagline">bisexual &nbsp;|&nbsp; she/her &nbsp;|&nbsp; isfp</p>
+  <div class="hero__divider"></div>
+  <p class="hero__quote" id="heroQuote"></p>
+  <div class="hero__scroll">
+    <span>scroll</span>
+    <div class="hero__scroll-line"></div>
+  </div>
+</section>
+
+<!-- ======== CONTENT ======== -->
+<main class="content">
+
+  <!-- RANDOM QUOTE BETWEEN SECTIONS -->
+  <div class="section-quote fade-in" id="sectionQuote1"></div>
+
+  <!-- TABS NAV -->
+  <nav class="tabs-nav fade-in">
+    <button class="tabs-nav__btn active" data-tab="about">О себе</button>
+    <button class="tabs-nav__btn" data-tab="work">Важные ссылки</button>
+    <button class="tabs-nav__btn" data-tab="playlist">Фав плейлист</button>
+    <button class="tabs-nav__btn" data-tab="lovelist">Лав-лист</button>
+  </nav>
+
+  <!-- ======== TAB: О СЕБЕ ======== -->
+  <div class="tab-panel active" id="tab-about">
+    <div class="subtabs-nav fade-in">
+      <button class="subtabs-nav__btn active" data-subtab="me">Я</button>
+      <button class="subtabs-nav__btn" data-subtab="fandoms">Мои фандомы</button>
+      <button class="subtabs-nav__btn" data-subtab="kinlist">Мой кинн-лист</button>
+      <button class="subtabs-nav__btn" data-subtab="thinice">Тонкий лёд</button>
+      <button class="subtabs-nav__btn" data-subtab="dni">DNI</button>
+    </div>
+
+    <div class="subtab-panel active" id="subtab-me">
+  <h2 class="fade-in">Я</h2>
+  <p class="bio-line fade-in">18.03  |  18 лет  |  Melancholic  |  4w5  |  sp4 so5 so9</p>
+
+  <div class="fade-in">
+    <ul class="about-list">
+      <li>В первую очередь собеседник, с которым тебе никогда не будет скучно. <span class="accent">Кар!</span> Мне характерно что-то тупое вкинуть и радостно убежать, сверкая пятками.</li>
+      <li>Учусь в строительном колледже, с последующим «повышением» на архитектора. Истинная чертила.</li>
+      <li>Редко, но метко отвечаю. Чаще всего торчу в публичных чатах, пушта соц.батарейка низкая. Шучу.. плохо. Но иногда это и вправду смешно!</li>
+      <li>Не понимаю намёков. Люблю, когда пишут всё прямо и не держат проблемы в себе. Главное в меру, я вам не мусорный бак и не личный психолог.</li>
+    </ul>
+
+    <button class="collapsible">ещё обо мне ▾</button>
+    <div class="collapsible-content">
+      <ul class="about-list">
+        <li>80% моё состояние — грустинка. Если я не хочу чего-то говорить — не надо меня упрашивать. Я 100% сп4, мне надо просто переварить самой проблемы, и я вернусь к вам свежая и хорошенькая.</li>
+        <li>Любите рандомные факты, шутки, пикчи с надписью «мы»? Это ко мне!!!</li>
+        <li>Отношусь ко всем дружелюбно, даже к табуреткам. Главное не начните мне говорить, что кто-то круче, а кто-то хуже. Нейтрально отношусь к трансам. Сама иногда юзаю слюры и дико шучу про евреев.</li>
+        <li>Я даркшиппер... ненавижу реальную чернь по типу инцестов, педо/зоо и т.д, но мои любимые пейринги это шаркбомб и ДжоЭлли (оба относятся к псевдо-инцестам), так что к пейрингам вымышленных персонажей такого типа я нормально отношусь.</li>
+      </ul>
+      <p class="easter-egg-trigger">А ещё? Ну.. ничего.. наверное..</p>
+      <p class="easter-egg-hidden">А ещё у меня косичка почти метровая.. ну.. вдруг это кому-то интересно..</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+        <h3 class="fade-in">А вообще, я:</h3>
+        <ul class="about-list fade-in">
+          <li>Делаю и тестирую ИИ ботов</li>
+          <li>Гарант на торговых площадках</li>
+          <li>Рисую, пишу, ролю</li>
+        </ul>
+      </div>
+
+    <div class="subtab-panel" id="subtab-fandoms">
+      <h2 class="fade-in">Мои фандомы</h2>
+      <div class="fandom-grid fade-in">
+      <img src="photo1.jpg" alt="фото" class="fade-in" style="width:100%; max-width:400px; border:1px solid #333; margin:1.5rem 0;">
+      <div class="fandom-col">
+        <h3>Игры</h3>
+        <ul class="fandom-list">
+          <li>The Witcher</li>
+          <li>Mortal Kombat</li>
+          <li>Cyberpunk 2077</li>
+          <li>The Last of Us</li>
+          <li>Arcane + LOL</li>
+          <li>Horizon</li>
+        </ul>
+      </div>
+      <div class="fandom-col">
+        <h3>Кино</h3>
+        <ul class="fandom-list">
+          <li>Американские фильмы + Люка Бессона</li>
+          <li>The Matrix</li>
+          <li>Dr. House</li>
+          <li>Pixar & Disney animation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+      <div class="subtab-panel" id="subtab-kinlist">
+      <h2 class="fade-in">Мой кинн-лист</h2>
+      <img src="photo2.jpg" alt="фото" class="fade-in" style="width:100%; max-width:400px; border:1px solid #333; margin:1.5rem 0;">
+      <ul class="kin-list fade-in">
+        <li><span class="kin-name">Gregory House</span> <span class="kin-source">Dr. House</span></li>
+        <li><span class="kin-name">Silco</span> <span class="kin-source">Arcane</span></li>
+        <li><span class="kin-name">Joel Miller</span> <span class="kin-source">The Last of Us</span></li>
+        <li><span class="kin-name">Blu</span> <span class="kin-source">Rio</span></li>
+        <li><span class="kin-name">Aurora</span> <span class="kin-source">League of Legends</span></li>
+      </ul>
+    </div>
+
+    <div class="subtab-panel" id="subtab-thinice">
+  <h2 class="fade-in">Тонкий лёд</h2>
+  <ul class="about-list fade-in">
+    <li>Люди с неоместоимениями <span class="muted-inline">(мне будет очень тяжело с вами общаться из-за трудности обращения)</span></li>
+    <li>Пишущие "ау?", "забей", если им тут же не ответили</li>
+    <li>Нет общих интересов</li>
+    <li>Просто общаетесь на отъебись и пропадаете на действительно долгие сроки без причин и etc.</li>
+  </ul>
+  <p class="muted-note fade-in">Ну и всё как бы, я даже с кроссовком могу закентиться, вщ похую.</p>
+</div>
+
+    <div class="subtab-panel" id="subtab-dni">
+  <h2 class="fade-in">DNI</h2>
+  <ul class="about-list fade-in">
+    <li>Ебанаты, поддерживающие нацизм, фашизм</li>
+    <li>Селфхармщики</li>
+    <li>Поддерживающие педо/зоо/другие -филии</li>
+    <li>Толерашки</li>
+    <li>Агрессивная сторона ЛГБТК+</li>
+    <li>Люди с нейроотличиями, которые были самодиагностированы с помощью левых тестов из интернета или тиктока <span class="muted-inline">(если у вас есть более веские аргументы — базару ноль, сходить к специалисту в наших реалиях это поистине дорогое удовольствие)</span></li>
+  </ul>
+
+    <blockquote class="dni-note fade-in">
+      Поймите одну вещь: я не ебу в 100% случаях кто вы, что вы за человек и с кем ебётесь, поэтому без объяснений я ливаю из диалога. Отвечаю я редко, о людях в интернете... особенно в лс... я тупо забываю :( Поэтому если я пропала, то это может значить, что я конкретно к вам уже не приду, либо (если отвечаю не спустя сутки, а шустрее поддержки роблокса) вы мне очень нравитесь, но я забываю ответить. Пинайте смело во второй раз. Можно и в третий...
+    </blockquote>
+  </div>
+  
+  </div> <!-- ЗАКРЫТИЕ tab-about -->
+  
+  <!-- ======== TAB: ВАЖНЫЕ ССЫЛКИ ======== -->
+  <div class="tab-panel" id="tab-work">
+    <h2 class="fade-in">АААА соцiалiзацiя</h2>
+    <div class="divider"></div>
+    
+    <div class="fade-in">
+      <h3>Связь со мной <span class="muted-inline">ну ниже ведь кнопки, бро..</span></h3>
+      <div class="contact-links">
+        <a href="https://t.me/anonravenbot" target="_blank" class="contact-card">
+          <span class="contact-icon">✉</span>
+          <span class="contact-label">Анонка</span>
+          <span class="contact-arrow">→</span>
+        </a>
+      </div>
+    </div>
+    
+    <div class="divider"></div>
+
+    <div class="link-buttons fade-in">
+      <a href="https://t.me/ramensarts" target="_blank" class="link-btn">Личный арт канал</a>
+      <a href="https://t.me/adhdautism" target="_blank" class="link-btn">Арт конфа</a>
+      <a href="https://t.me/siIcocf" target="_blank" class="link-btn">Силко конфа (архив)</a>      
+      <a href="https://t.me/ravensproofs" target="_blank" class="link-btn">Я как гарант</a>
+    </div>
+  </div>
+
+  <!-- ======== TAB: ПЛЕЙЛИСТ ======== -->
+  <div class="tab-panel" id="tab-playlist">
+    <h2 class="fade-in">▶ Play!</h2>
+    <div class="divider"></div>
+    <div class="spotify-wrap fade-in">
+      <iframe src="https://open.spotify.com/embed/album/2ajCD41iDxflpYBZmSO9S7?utm_source=generator&theme=0" height="452" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
+    <p class="fade-in" style="margin-top:1rem; font-size:0.75rem; color:#444; font-style:italic;">Не грузится? <a href="https://open.spotify.com/album/2ajCD41iDxflpYBZmSO9S7" target="_blank" style="color:#ff2d8a; text-decoration:none;">Открой в Spotify напрямую ↗</a></p>
+  </div>
+
+  <!-- ======== TAB: ЛАВ-ЛИСТ ======== -->
+  <div class="tab-panel" id="tab-lovelist">
+    <h2 class="fade-in">Лав-лист</h2>
+    <div class="divider"></div>
+    <ul class="love-list fade-in">
+      <li><target="_blank"><span class="heart">♡</span> Антоша</a></li>
+      <li><target="_blank"><span class="heart">♡</span> Юра</a></li>
+      <li><a href="https://t.me/te44iko" target="_blank"><span class="heart">♡</span> Терри</a></li>   
+      <li><a href="tg://openmessage?user_id=1170602873" target="_blank"><span class="heart">♡</span> Тарек</a></li>
+    </ul>
+  </div>
+
+</main>
+
+<!-- ======== MUSIC PLAYER ======== -->
+<div class="player" id="player">
+  <canvas id="visualizer" class="player__visualizer"></canvas>
+  <div class="player__lyrics" id="lyricsDisplay"></div>
+  <div class="player__controls">
+    <button class="player__btn" id="prevBtn">⟨⟨</button>
+    <button class="player__btn player__btn--play" id="playBtn">▶</button>
+    <button class="player__btn" id="nextBtn">⟩⟩</button>
+  </div>
+  <div class="player__progress-wrap" id="progressWrap">
+    <div class="player__progress" id="progressBar"></div>
+  </div>
+  <div class="player__info">
+    <span class="player__title" id="trackTitle">—</span>
+    <span class="player__time" id="trackTime">0:00 / 0:00</span>
+  </div>
+  <div class="player__playlist" id="playlist"></div>
+</div>
+  
+<!-- ======== FOOTER ======== -->
+<footer>
+  <div class="footer-quote" id="footerQuote"></div>
+  <div class="social-icons fade-in">
+    <!-- Telegram SVG -->
+    <a href="https://t.me/vvuem" target="_blank" title="Telegram">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+    </a>
+    <!-- VK SVG -->
+    <a href="https://vk.com/worryflame" target="_blank" title="VKontakte">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.391 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.864-.525-2.05-1.727-1.033-1-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.593v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.12-5.335-3.202C4.624 10.857 4.03 8.57 4.03 8.096c0-.254.102-.491.593-.491h1.744c.44 0 .61.203.78.678.847 2.49 2.27 4.675 2.853 4.675.22 0 .322-.102.322-.66V9.721c-.068-1.186-.695-1.287-.695-1.71 0-.203.17-.407.44-.407h2.744c.373 0 .508.203.508.643v3.473c0 .372.17.508.271.508.22 0 .407-.136.813-.542 1.253-1.406 2.15-3.574 2.15-3.574.119-.254.322-.491.763-.491h1.744c.525 0 .644.27.525.643-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.05.17.49-.085.744-.576.744z"/></svg>
+    </a>
+  </div>
+  <p class="footer-copy">© 2025</p>
+</footer>
+
+<script>
+  // ---- ЦИТАТЫ ШИРАНА ----
+  const quotes = [
+    "Kept quiet, but I came to be heard",
+    "Two of tried, but I won both cases",
+    "I feel an overwhelming sadness, of all the friends I do not have left",
+    "Orbit me, my satellite",
+    "Don't wanna make an enemy of you",
+    "We stack inside of war game"
+  ];
+
+  function getRandomQuote(exclude) {
+    let filtered = quotes.filter(q => q !== exclude);
+    return filtered[Math.floor(Math.random() * filtered.length)];
+  }
+
+  // Заполняем цитаты при загрузке
+  const heroQuote = document.getElementById('heroQuote');
+  const sectionQuote1 = document.getElementById('sectionQuote1');
+  const footerQuote = document.getElementById('footerQuote');
+
+  heroQuote.textContent = '"' + getRandomQuote('') + '"';
+  sectionQuote1.textContent = '"' + getRandomQuote(heroQuote.textContent) + '"';
+  footerQuote.textContent = '"' + getRandomQuote(sectionQuote1.textContent) + '"';
+
+// Функция смены цитаты с мощным глитчем
+function changeQuoteWithBurst(element, interval) {
+  setInterval(() => {
+    // Мощный глитч
+    element.classList.add('quote-burst');
+    element.style.opacity = '0';
+
+    // Волны по бокам
+    const wL = document.getElementById('waveLeft');
+    const wR = document.getElementById('waveRight');
+    wL.classList.remove('active');
+    wR.classList.remove('active');
+    void wL.offsetWidth; // перезапуск анимации
+    wL.classList.add('active');
+    wR.classList.add('active');
+
+    // Глитч-полосы при смене
+    for (let i = 0; i < 4; i++) {
+      setTimeout(() => spawnGlitchBar(), i * 40);
+    }
+
+    setTimeout(() => {
+      element.textContent = '"' + getRandomQuote(element.textContent) + '"';
+      element.style.opacity = '';
+      setTimeout(() => element.classList.remove('quote-burst'), 400);
+    }, 400);
+  }, interval);
+}
+
+changeQuoteWithBurst(heroQuote, 8000);
+changeQuoteWithBurst(sectionQuote1, 11000);
+changeQuoteWithBurst(footerQuote, 14000);
+
+  // ---- ГЛИТЧ ПО ВСЕМУ САЙТУ ----
+  const glitchTargets = document.querySelectorAll(
+    '.hero__name, .hero__play, .hero__tagline, h2, h3, .section-quote, .footer-quote, .footer-copy'
+  );
+
+  function triggerRandomGlitch() {
+    // Выбираем 1-3 случайных элемента
+    let count = Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < count; i++) {
+      let target = glitchTargets[Math.floor(Math.random() * glitchTargets.length)];
+      target.classList.add('glitching');
+      setTimeout(() => {
+        target.classList.remove('glitching');
+      }, 150 + Math.random() * 200);
+    }
+  }
+
+  // Глитч каждые 1.5-3 секунды (рандомный интервал)
+  function scheduleGlitch() {
+    let delay = 1500 + Math.random() * 1500;
+    setTimeout(() => {
+      triggerRandomGlitch();
+      scheduleGlitch();
+    }, delay);
+  }
+  scheduleGlitch();
+
+  // ---- СЛУЧАЙНЫЕ ГОРИЗОНТАЛЬНЫЕ ГЛИТЧ-ПОЛОСЫ ----
+  function spawnGlitchBar() {
+    const bar = document.createElement('div');
+    bar.style.cssText = `
+      position: fixed;
+      left: 0;
+      width: ${30 + Math.random() * 70}%;
+      height: ${1 + Math.random() * 3}px;
+      top: ${Math.random() * 100}%;
+      background: linear-gradient(90deg, transparent, rgba(255,45,138,${0.2 + Math.random() * 0.4}), rgba(214,0,255,${0.1 + Math.random() * 0.3}), transparent);
+      pointer-events: none;
+      z-index: 9997;
+    `;
+    document.body.appendChild(bar);
+    setTimeout(() => bar.remove(), 80 + Math.random() * 150);
+  }
+
+  setInterval(() => {
+    if (Math.random() > 0.4) {
+      let bursts = Math.floor(Math.random() * 3) + 1;
+      for (let i = 0; i < bursts; i++) {
+        setTimeout(() => spawnGlitchBar(), i * 30);
+      }
+    }
+  }, 2500);
+
+  // ---- TABS ----
+  const tabBtns = document.querySelectorAll('.tabs-nav__btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabPanels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      observeAll();
+    });
+  });
+
+  // ---- SUB-TABS ----
+  const subBtns = document.querySelectorAll('.subtabs-nav__btn');
+  const subPanels = document.querySelectorAll('.subtab-panel');
+
+  subBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      subBtns.forEach(b => b.classList.remove('active'));
+      subPanels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('subtab-' + btn.dataset.subtab).classList.add('active');
+      observeAll();
+    });
+  });
+
+  // ---- FADE-IN ON SCROLL ----
+  function observeAll() {
+    const faders = document.querySelectorAll('.fade-in:not(.visible)');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    faders.forEach(el => observer.observe(el));
+  }
+
+  observeAll();
+
+  // ---- ГЛИТЧ ПРИ ХОВЕРЕ НА ЗАГОЛОВКИ ----
+  document.querySelectorAll('h2, h3, .hero__name').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      el.classList.add('glitching');
+      setTimeout(() => el.classList.remove('glitching'), 200);
+    });
+  });
+  
+  // ---- COLLAPSIBLE SECTIONS ----
+  document.querySelectorAll('.collapsible').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('open');
+      const content = btn.nextElementSibling;
+      content.classList.toggle('open');
+      btn.textContent = content.classList.contains('open') ? 'свернуть ▴' : 'ещё обо мне ▾';
+    });
+  });
+
+  // ---- EASTER EGG ----
+  document.querySelectorAll('.easter-egg-trigger').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const hidden = trigger.nextElementSibling;
+      hidden.classList.toggle('revealed');
+    });
+  });
+
+// ---- MUSIC PLAYER WITH VISUALIZER + SYNCED LYRICS ----
+
+// === ПЛЕЙЛИСТ ===
+// Замени пути на свои mp3 файлы в папке music/
+const tracks = [
+  {
+    title: "Fire Starter - Sophie Powers, Mimi Webb, SOYEON & MIYEON",
+    src: "music/FireStarter.mp3",
+    lyrics: [
+      [0.00, ""],
+      [2.10, "I'm a fire starter, work a little harder"],
+      [5.40, "Got me fired up, I'ma burn it down like"],
+      [8.50, "I'm a fire starter, crazy, out of order"],
+      [11.70, "I'm a- I'm a- I'm a fire starter"],
+      [14.20, "I'ma start a fire, oh, I like a little drama"],
+      [17.30, "Call the fire fighter, call me crazy, call it karma"],
+      [20.40, "Burn it to the ground, yeah, we do it how we wanna"],
+      [23.60, "No, you can't put me out, no, you can't put me out"],
+      [26.55, "I'ma start a fire, oh, I like a little drama"],
+      [29.85, "Call the fire fighter, call me crazy, call it karma"],
+      [32.90, "Burn it to the ground, yeah, we do it how we wanna"],
+      [36.10, "No, you can't put me out, no, you can't put me out"],
+      [39.10, "Chaos runnin' wild in my veins, 느껴봐"],
+      [41.85, "차갑던 이 세상을 붉게 물들일 이 순간"],
+      [45.10, "Ready for the spark, yeah, we lightin' up the dark"],
+      [48.30, "Watch the embers rise, you can see it in my eyes"],
+      [51.40, "I'ma start a fire, oh, I like a little drama"],
+      [54.60, "Call the fire fighter, call me crazy, call it karma"],
+      [57.75, "Burn it to the ground, yeah, we do it how we wanna"],
+      [60.90, "No, you can't put me out, no, you can't put me out"],
+      [63.95, "I'ma start a fire, oh, I like a little drama"],
+      [67.15, "Call the fire fighter, call me crazy, call it karma"],
+      [70.25, "Burn it to the ground, yeah, we do it how we wanna"],
+      [73.40, "No, you can't put me out, no, you can't put me out"],
+      [76.50, "I'm a fire starter, work a little harder"],
+      [79.70, "Got me fired up, I'ma burn it down like"],
+      [82.80, "I'm a fire starter, crazy, out of order"],
+      [86.00, "I'm a- I'm a- I'm a fire starter"],
+      [89.10, "(Yeah, we lightin' up the dark)"],
+      [92.30, "I'm a fire starter"],
+      [95.50, "(No, you can't put me out)"],
+      [98.20, "I'm a fire starter"],
+      [102.00, ""]
+    ]
+  },  
+    {
+    title: "Afterlife — Thai McGrath (feat. JustCosplaySings)",
+    src: "music/Afterlife.mp3",
+    lyrics: [
+      [3.68, "(Yeah, my darlin')"],
+      [4.71, "(Tear it up and burn it down)"],
+      [6.78, "(Then meet me in the Afterlife)"],
+      [9.83, "Ridin' the edge of this town in the smokey haze and dimming lights"],
+      [14.45, "Flying away, I want to stay with you"],
+      [19.35, "We sail in the city and drown under the neon lights"],
+      [23.66, "Running away, I want to stay in your smile because"],
+      [27.58, "What is love?"],
+      [28.73, "If I can't tell the world?"],
+      [29.96, "What is passion?"],
+      [31.00, "Is my desire sin?"],
+      [32.51, "What is freedom?"],
+      [33.38, "If there's a price that we have to pay, have to pay?"],
+      [36.76, "What is craving?"],
+      [37.96, "When you're within my reach"],
+      [39.10, "What is dreaming?"],
+      [40.21, "When I can't ever sleep"],
+      [41.38, "What is living?"],
+      [42.36, "We're wasting our lives every day"],
+      [44.46, "Just one last kiss"],
+      [46.73, "Before that bliss"],
+      [49.08, "'Cause I would rather plunge and twist the knife"],
+      [52.65, "And lie down as legends than face this time"],
+      [55.90, "Without you, dear"],
+      [58.48, "Yeah my darlin'"],
+      [59.61, "Tear it up and burn it down"],
+      [61.58, "Then meet me in the Afterlife"],
+      [67.33, "I look, I see you right there in the corner of this empty bar"],
+      [71.61, "Across the space, hangin' between us two"],
+      [76.41, "You smile a little as you catch my eye across the room"],
+      [80.83, "Across the stage, standing in front of you"],
+      [84.76, "What is love?"],
+      [85.95, "If I can't tell the world?"],
+      [87.11, "What is passion?"],
+      [88.26, "Is my desire sin?"],
+      [89.31, "What is freedom?"],
+      [90.51, "If there's a price that we have to pay, have to pay?"],
+      [93.98, "What is craving?"],
+      [95.06, "When you're within my reach"],
+      [96.21, "What is dreaming?"],
+      [97.36, "When I can't ever sleep"],
+      [98.53, "What is living?"],
+      [99.48, "We're wasting our lives every day"],
+      [101.60, "Just one last kiss"],
+      [104.06, "Before that bliss"],
+      [106.20, "'Cause I would rather plunge and twist the knife"],
+      [109.75, "And lie down as legends than face this time"],
+      [113.08, "Without you, dear"],
+      [115.58, "Yeah, my darlin'"],
+      [116.75, "Tear it up and burn it down"],
+      [118.78, "Then meet me in the Afterlife"],
+      [121.83, "Light up, light up"],
+      [124.65, "Strike up the match and burn"],
+      [126.48, "Burn down, burn down"],
+      [129.31, "All of the walls that divide"],
+      [130.98, "Set fire, set fire"],
+      [133.76, "Becoming the spirits ablaze"],
+      [135.60, "Immortalized"],
+      [138.16, "Just one last kiss"],
+      [140.55, "Before that bliss"],
+      [142.75, "'Cause I would rather plunge and twist the knife"],
+      [146.38, "And lie down as legends than face this time"],
+      [149.80, "Without you, dear"],
+      [152.20, "Yeah my darlin'"],
+      [153.41, "Tear it up and burn it down"],
+      [155.38, "Then meet me in the Afterlife"],
+      [159.56, ""]
+    ]
+  },
+    {
+    title: "Nebula — ESAI, Pure 100%",
+    src: "music/Nebula.mp3",
+    lyrics: [
+      [12.69, "Kurayami kara utsusareru"],
+      [16.10, "Amanogawa ni okotte yuku"],
+      [19.30, "From constellations to the nations"],
+      [21.06, "Ready, set and go"],
+      [22.46, "Koi no batoru ga hajimaru no"],
+      [25.58, "Jūjin ja naken no from another star"],
+      [28.61, "Komakkai wa has made who we are"],
+      [31.81, "From constellations to the nations"],
+      [33.50, "Ready, set and go"],
+      [35.03, "Koi no batoru ga hajimaru no"],
+      [38.23, "Ooh, I'm fallin', I'm fallin'"],
+      [41.33, "In gravity"],
+      [42.77, "Onegai omoi no"],
+      [44.41, "Ooh, I'm fallin', I'm fallin'"],
+      [47.58, "Insanity"],
+      [60.00, "Koi no batoru ga hajimaru no"],
+      [73.00, "Amanogawa ni okotte yuku"],
+      [75.01, "Kurayami kara utsusareru"],
+      [78.48, "Amanogawa ni okotte yuku"],
+      [81.96, "From constellations to the nations"],
+      [83.68, "Ready, set and go"],
+      [85.08, "Koi no batoru ga hajimaru no"],
+      [113.65, "Ooh, I'm fallin', I'm fallin'"],
+      [116.40, "In gravity"],
+      [118.05, "Onegai omoi no"],
+      [119.72, "Ooh, I'm fallin', I'm fallin'"],
+      [122.81, "Insanity"],
+      [135.08, "Koi no batoru ga hajimaru no"],
+      [147.75, "Amanogawa ni okotte yuku"],
+      [151.04, ""]
+    ]
+  },
+    {
+    title: "さまよえるままゆけ — Haru Nemuri",
+    src: "music/music3.mp3",
+    lyrics: [
+      [0.43, "Hontou ni utsukushii mono no tameni shinitainda"],
+      [9.87, "Datte ikiteiru dakede yogoreru kara"],
+      [19.63, "Shinette kimochi wo nomikonde"],
+      [23.23, "Uchigawa kara zutazuta ni naru"],
+      [30.20, "Chini mamireta kono tamashii de nani wo suru?"],
+      [38.17, "Samayoeru mama yuke"],
+      [46.51, "No paradise for"],
+      [48.20, "No paradise for"],
+      [49.00, "Samayoeru mama yuke"],
+      [55.04, "No paradise for"],
+      [57.60, "No paradise for"],
+      [60.32, "Samayoeru mama yuke"],
+      [110.32, "Samayoeru mama yuke"],
+      [120.24, "Samayoeru mama yuke"],
+      [130.28, "Samayoeru mama yuke"],
+      [134.92, "No paradise for"],
+      [137.68, "No paradise for"],
+      [140.40, "Samayoeru mama yuke"],
+      [145.40, "No paradise for"],
+      [147.72, "No paradise for"],
+      [150.05, "Stray souls"],
+      [152.17, "No paradise for"],
+      [155.18, "No paradise for"],
+      [157.71, "Stray souls"],
+      [160.01, ""]
+    ]
+  },
+    {
+    title: "Fumes — Aleyna Moon & Shrinjay Ghosh",
+    src: "music/Fumes.mp3",
+    lyrics: [
+      [13.61, "Lucky you!"],
+      [15.18, "I'm looking for a winner"],
+      [16.90, "Tripping by the edge"],
+      [18.42, "Let me catch you by the inner"],
+      [20.54, "Short sighted"],
+      [22.01, "Put your mind inside a blender"],
+      [23.98, "Tonight you won't forget"],
+      [25.35, "But you'll wish you don't remember"],
+      [27.38, "Not the man you used to be?"],
+      [30.81, "If I gut you, will you bleed?"],
+      [34.33, "It's getting hard for you to breathe?"],
+      [37.14, "Lucky for you, I know what to do"],
+      [39.17, "Got nothing to lose so come and pull through"],
+      [41.10, "Where the bass bangs till you're tripping"],
+      [42.70, "Baby we chug chug, quit the sipping"],
+      [44.18, "Bodies and bodies so lost in the dripping"],
+      [45.74, "Now we hit it OFF/ON, keep it flipping"],
+      [47.54, "I'm gone in the head and you're dead in the brain"],
+      [49.14, "Don't need no sunshine, make it rain"],
+      [50.89, "Now I got no time for your low high"],
+      [52.69, "Want that cool ice in my veins"],
+      [54.46, "Run, run, running like we do"],
+      [57.74, "All our problems are paused inside the room"],
+      [61.37, "Fun, fun, fucking hit resume"],
+      [64.82, "Play baby, play like we're running on fumes"],
+      [68.42, "Running on, running on, running on"],
+      [72.22, "Running on, running on, running on"],
+      [75.41, "Now catch on, be a fucking choom"],
+      [78.50, "Breathing in, getting off, running on"],
+      [81.58, "Fumes"],
+      [82.34, "Running on, running on, running on"],
+      [85.75, "Fumes"],
+      [89.22, "Running on, running on, running on"],
+      [92.70, "Fumes"],
+      [95.93, "Looking for what you desire"],
+      [97.74, "Kicking with nothing-but-liars"],
+      [99.50, "Trusting your gut but you're tied"],
+      [101.14, "And done done with the flickers of fire"],
+      [102.93, "So play with it now, putting it down"],
+      [104.38, "Breathe it in, breathe it out"],
+      [105.94, "If it feels good, then it is good"],
+      [107.49, "You don't want to but you know that you would"],
+      [109.53, "And you could now but don't wanna die"],
+      [111.22, "Crave it so bad you wanna cry"],
+      [113.02, "We're all running out of time"],
+      [114.54, "I just wanna feel alive"],
+      [116.53, "One taste come and take a bite"],
+      [117.90, "Take you to the other side"],
+      [119.86, "Where the low lives keep it tongue-tied"],
+      [121.42, "Are you alright from the high?"],
+      [125.10, "Run, run, running like we do"],
+      [128.22, "All our problems are paused inside the room"],
+      [131.93, "Fun, fun, fucking hit resume"],
+      [134.98, "Play baby, play like we're running on fumes"],
+      [138.65, "Running on, running on, running on"],
+      [142.21, "Running on, running on, running on"],
+      [145.62, "Now catch on, be a fucking choom"],
+      [148.74, "Breathing in, getting off, running on"],
+      [152.25, "Fumes"],
+      [153.30, "Running on, running on, running on"],
+      [155.46, "Fumes"],
+      [159.73, "Running on, running on, running on"],
+      [163.45, "Fumes"],
+      [167.02, ""]
+    ]
+  },
+    {
+    title: "El Tiempo — Skin on Flesh",
+    src: "music/El.mp3",
+    lyrics: [
+      [12.78, "Hace ya mucho tiempo"],
+      [14.78, "Que no gritas al viento"],
+      [17.62, "Estás en el infierno"],
+      [20.49, "Un eterno invierno"],
+      [23.54, "Loco te estás volviendo"],
+      [24.86, "Y así pierdes el tiempo"],
+      [26.33, "Que no tienes talento"],
+      [27.75, "Porque no hay alimento"],
+      [29.22, "No te mueve un te quiero"],
+      [30.54, "Vales mil y otros cientos"],
+      [31.98, "Juro no estoy mintiendo"],
+      [33.34, "Te amo así todo el tiempo"],
+      [35.26, "(Aaah, aaah, aaah, aaah ah)"],
+      [38.93, "Te amo así todo el tiempo"],
+      [40.49, "Qué me importa el dinero"],
+      [43.22, "Las drogas y el sexo"],
+      [45.86, "Que si no estás atento"],
+      [48.69, "No llegarás tan lejos"],
+      [51.43, "Ya no tengas más miedo"],
+      [52.94, "Aquí yo estoy sincero"],
+      [54.54, "Y no escuches tu mente"],
+      [55.93, "Que te dice detente"],
+      [57.42, "Porque no importa nada"],
+      [58.70, "Si no dices te quiero"],
+      [60.14, "Cuando miras al centro"],
+      [61.62, "De todo el universo"],
+      [74.21, "Hace ya mucho tiempo"],
+      [77.01, "Que no gritas al viento"],
+      [79.74, "Estás en el infierno"],
+      [82.50, "Un eterno invierno"],
+      [85.37, "Loco te estas volviendo"],
+      [87.02, "Y así pierdes el tiempo"],
+      [88.49, "Que no tienes talento"],
+      [89.85, "Porque no hay alimento"],
+      [91.25, "No te mueve un te quiero"],
+      [92.74, "Vales mil y otros cientos"],
+      [94.10, "Juro no estoy mintiendo"],
+      [95.49, "Te amo así todo el tiempo"],
+      [102.98, "(Aaah, aaah, aaah, aaah ah)"],
+      [123.67, "Te amo así todo el tiempo"],
+      [125.71, ""]
+    ]
+  },
+    {
+    title: "Playground — Bea Miller",
+    src: "music/Playground.mp3",
+    lyrics: [
+      [5.82, "Who told you what was down here?"],
+      [10.04, "Come along if you wanted a peek"],
+      [14.82, ""],
+      [17.86, "I've seen your face around here"],
+      [22.30, "Come alone, tell me under the table"],
+      [27.61, "What do you seek?"],
+      [31.22, ""],
+      [33.54, "Welcome to the playground, follow me"],
+      [39.70, "Tell me your nightmares and fantasies"],
+      [45.84, "Sink into the wasteland underneath"],
+      [51.82, "Stay for the night, I'll sell you a dream"],
+      [57.97, "Oh-oh, woah-yeah"],
+      [65.61, "Welcome to the playground"],
+      [70.31, ""],
+      [72.83, "What brings you to the lost and found, dear?"],
+      [78.82, "Won't you pull up a seat?"],
+      [84.53, "Everybody got a price 'round here to play"],
+      [91.71, "Make me an offer, what will it be?"],
+      [98.64, "Oh, what will it be?"],
+      [103.78, "Welcome to the playground, follow me"],
+      [109.90, "Tell me your nightmares and fantasies"],
+      [116.08, "Sink into the wasteland underneath"],
+      [121.98, "Stay for the night, I'll sell you a dream"],
+      [128.15, "Oh-oh, woah-yeah"],
+      [135.85, "Welcome to the playground"],
+      [140.49, "Oh-oh, woah-yeah"],
+      [147.84, "Welcome to the playground"],
+      [153.17, ""],
+      [172.41, "Welcome to the playground"],
+      [176.99, ""],
+      [196.89, "Welcome to the playground"],
+      [201.45, "Welcome to the playground, follow me"],
+      [207.62, "Tell me your nightmares and fantasies"],
+      [213.52, "Sink into the wasteland underneath"],
+      [219.64, "Stay for the night, I'll sell you a dream"],
+      [224.30, ""]
+    ]
+  },
+    {
+    title: "Misfit Toys — Pusha T feat. Mako",
+    src: "music/Misfit.mp3",
+    lyrics: [
+      [10.35, "I declare war"],
+      [12.11, "On anybody standing in the way of what I dream for"],
+      [15.27, "How could you ignore"],
+      [16.72, "The ones that are voiceless, screams from the poor"],
+      [19.89, "They only here to score"],
+      [21.63, "I do it for the underground kings that'll need more"],
+      [24.52, "I'm kickin' down your door"],
+      [26.57, "If I wonder why you got a pocket full of green for"],
+      [29.49, "It's all about the get back"],
+      [31.10, "It's hard to give back while the politicians kick back"],
+      [34.21, "They say I'm only brick rap"],
+      [36.02, "Well, that's the foundation of this mountain that I live at"],
+      [39.12, "I can get you kidnapped"],
+      [40.70, "These kids ain't playin' with you, actin' like you live rap"],
+      [43.89, "And all those little mishaps"],
+      [45.66, "That only happen to you misfits, I'm here to fix that"],
+      [48.76, "Time to dig up your grave"],
+      [51.14, "Make it lower your voice"],
+      [53.71, "I told you not to play with the misfit toys"],
+      [58.47, "We running this gang"],
+      [60.71, "Getting sick of your noise"],
+      [63.32, "You stranded with a bad bunch of misfit toys"],
+      [67.54, "Rich get richer while the poor pickpocket"],
+      [69.94, "Swipes Maxwell 'til the cops come knockin'"],
+      [72.11, "Have or have not, bein' broke is not an option"],
+      [74.45, "Time after time when you got a thing for watches"],
+      [77.58, "When you the plug in the socket"],
+      [79.63, "And the powers that be can't stop it"],
+      [81.96, "So obnoxious, borderline toxic"],
+      [84.55, "Both sides go to war like a mosh pit"],
+      [87.49, "Now let me switch up the optics"],
+      [89.72, "Our neighborhoods held us hostage"],
+      [91.86, "Some nights we slept in our closets"],
+      [94.37, "Gun fights was outside the projects"],
+      [96.95, "So you can't blame me for nonsense"],
+      [99.26, "I'm here to collect deposits"],
+      [101.60, "All else defies the logic"],
+      [104.07, "My people need me beside them"],
+      [106.33, "Time to dig up your grave"],
+      [108.60, "Make it lower your voice"],
+      [111.57, "I told you not to play with the misfit toys"],
+      [115.95, "We running this gang"],
+      [118.22, "Getting sick of your noise"],
+      [121.10, "You stranded with a bad bunch of misfit toys"],
+      [125.85, "Don't play with the misfits"],
+      [128.11, "Come play with the misfits"],
+      [130.77, "Don't play with the misfits"],
+      [133.01, "Come and play with the misfits"],
+      [134.67, "I told you don't play with the misfits"],
+      [136.98, "Must be deaf dumb and blind you a triplet"],
+      [139.59, "Don't you make me erase your existence"],
+      [141.87, "All by my lonely need no assistance"],
+      [144.20, "Any disrespect gets met with a vengeance"],
+      [146.63, "Burn down gossip and hidden agendas"],
+      [149.12, "We set the tone for all to remember"],
+      [151.51, "You rewrite history the greatest pretenders"],
+      [153.78, "(You rewrite history the greatest pretenders)"],
+      [156.60, "Time to dig up your grave"],
+      [159.25, "Make it lower your voice"],
+      [161.85, "I told you not to play with the misfit toys"],
+      [166.45, "We running this gang"],
+      [168.75, "Getting sick of your noise"],
+      [171.38, "You stranded with a bad bunch of misfit toys"],
+      [176.22, "Don't play with the misfits"],
+      [178.52, "Come play with the misfits"],
+      [180.93, "You stranded with a bad bunch of misfit toys"],
+      [186.18, ""]
+    ]
+  },
+    {
+    title: "Come Play — Stray Kids, Young Miko, Morello",
+    src: "music/Come.mp3",
+    lyrics: [
+      [14.60, "You're not alone, look at my shadow, I'm behind you like a ghost"],
+      [18.43, "Mission \"die a legend\" is a go"],
+      [19.99, "The way I flow, taking all the shots, landing free throws, beast mode"],
+      [23.06, "Double snake eyes, turn 'em all to stone"],
+      [24.92, "And you're a student of war, 내가 되갚을 때면"],
+      [27.33, "I'll leave you begging for more, 뼛속 깊이 느껴 너"],
+      [29.95, "그 문을 여는 순간 더이상 game은 없어"],
+      [32.40, "별다른 해답은 none, 처음 맛보는 광경"],
+      [35.41, "Try me, I dare you to try me"],
+      [39.14, "Took me long, but I'm here"],
+      [41.70, "Coming down like lightning"],
+      [44.24, "Taking back what's mine, it was a matter of time"],
+      [49.62, "If you wanna come play, you gotta start with me"],
+      [53.97, "And the monsters in my head, in my head"],
+      [59.51, "I got blood on my hands and you're my revenge"],
+      [64.04, "And you pushed me to the edge, the edge"],
+      [69.72, "Do you wanna come play?"],
+      [71.03, "Te la viviste si en mí no creía'"],
+      [72.91, "Llegamo' con el combo ready pa' hacerle' una avería"],
+      [76.04, "Cuida'o que tengo mecha corta y puede que te explote la encía"],
+      [78.88, "Prendo fuego y te quemo to'a la mercancía"],
+      [81.00, "Mejor pedir perdón que pedir permiso, me la improviso"],
+      [83.88, "Y a to'a esta gente le doy contra el piso"],
+      [85.78, "Si quieren medir fuerza, le' tengo un aviso"],
+      [87.95, "Ma-mala suerte con la nena que dispara y preciso"],
+      [90.94, "Try me, I dare you to try me"],
+      [94.79, "Took me long, but I'm here"],
+      [97.24, "Coming down like lightning"],
+      [99.71, "Taking back what's mine, it was a matter of time"],
+      [105.19, "If you wanna come play, you gotta start with me"],
+      [109.65, "And the monsters in my head, in my head"],
+      [115.12, "I got blood on my hands and you're my revenge"],
+      [119.52, "And you pushed me to the edge, the edge"],
+      [125.24, "Do you wanna come play?"],
+      [127.98, "(Hey, yeah, yeah, hoo)"],
+      [130.44, "Do you wanna come play?"],
+      [132.08, "(Do you wanna come play? Hey, yeah, yeah, hoo)"],
+      [137.94, "If you wanna come play, you gotta start with me"],
+      [142.24, "And the monsters in my head, in my head"],
+      [148.09, "I got blood on my hands and you're my revenge"],
+      [152.50, "And you pushed me to the edge, the edge"],
+      [158.25, "Do you wanna come play?"],
+      [159.54, ""]
+    ]
+  },
+    {
+    title: "Rebel Heart — Djerv",
+    src: "music/Rebel.mp3",
+    lyrics: [
+      [11.95, "I just wanna blow shit up"],
+      [14.80, "Love it, blow shit up"],
+      [17.17, "Don't care, let's riot"],
+      [19.79, "I bring a bomb to a fist fight"],
+      [22.28, "In chaos I reign"],
+      [24.60, "Tear this place apart"],
+      [28.43, "Rebel heart"],
+      [31.88, "In chaos I'm free"],
+      [34.17, "Destruction is art"],
+      [37.86, "Rebel heart"],
+      [45.01, "Don't you wanna be vicious"],
+      [47.44, "Don't you wanna tell lies"],
+      [49.42, "Come join me on the dark side (It's a paradise)"],
+      [54.18, "No rules, pure mayhem"],
+      [56.81, "That is who I am"],
+      [58.85, "And I watch you do it as we tear it down"],
+      [61.68, "Burn it to the ground"],
+      [64.83, "In chaos I reign"],
+      [67.30, "Tear this place apart"],
+      [71.05, "Rebel heart"],
+      [74.16, "In chaos I'm free"],
+      [76.61, "Destruction is art"],
+      [80.38, "Rebel heart"],
+      [83.67, ""],
+      [101.88, "I've been here from the very start"],
+      [106.49, "I will give you my rebel heart"],
+      [111.21, "I've been here from the very start"],
+      [115.81, "You cannot break my rebel heart"],
+      [121.42, ""],
+      [130.92, "In chaos I reign"],
+      [133.40, "Tear this place apart"],
+      [137.06, "Rebel heart"],
+      [140.42, "In chaos I'm free"],
+      [142.73, "Destruction is art"],
+      [146.56, "Rebel heart"],
+      [149.70, "(It's chaos, all chaos)"],
+      [154.31, "(I'll give my) Rebel heart"],
+      [159.14, "(It's chaos, just chaos)"],
+      [163.91, "(Inside my) Rebel heart"],
+      [170.45, ""]
+    ]
+  }
+];
+
+const audio = new Audio();
+let currentTrack = 0;
+let audioCtx, analyser, source, dataArray, bufferLength;
+let visualizerStarted = false;
+
+const canvas = document.getElementById('visualizer');
+const ctx = canvas.getContext('2d');
+const lyricsEl = document.getElementById('lyricsDisplay');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const progressBar = document.getElementById('progressBar');
+const progressWrap = document.getElementById('progressWrap');
+const trackTitle = document.getElementById('trackTitle');
+const trackTime = document.getElementById('trackTime');
+const playlistEl = document.getElementById('playlist');
+
+// Рендер плейлиста
+function renderPlaylist() {
+  playlistEl.innerHTML = '';
+  tracks.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'player__track' + (i === currentTrack ? ' active' : '');
+    div.innerHTML = '<span><span class="player__track-num">' + String(i + 1).padStart(2, '0') + '</span>' + t.title + '</span>';
+    div.addEventListener('click', () => { currentTrack = i; loadAndPlay(); });
+    playlistEl.appendChild(div);
+  });
+}
+
+// Загрузка трека
+function loadTrack(index) {
+  audio.src = tracks[index].src;
+  trackTitle.textContent = tracks[index].title;
+  lyricsEl.textContent = '';
+  renderPlaylist();
+}
+
+function loadAndPlay() {
+  loadTrack(currentTrack);
+  audio.play();
+  playBtn.textContent = '❚❚';
+  initVisualizer();
+}
+
+// Play/Pause
+playBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    if (!audio.src || audio.src === window.location.href) loadTrack(currentTrack);
+    audio.play();
+    playBtn.textContent = '❚❚';
+    initVisualizer();
+  } else {
+    audio.pause();
+    playBtn.textContent = '▶';
+  }
+});
+
+prevBtn.addEventListener('click', () => {
+  currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
+  loadAndPlay();
+});
+
+nextBtn.addEventListener('click', () => {
+  currentTrack = (currentTrack + 1) % tracks.length;
+  loadAndPlay();
+});
+
+audio.addEventListener('ended', () => {
+  currentTrack = (currentTrack + 1) % tracks.length;
+  loadAndPlay();
+});
+
+// Прогресс
+audio.addEventListener('timeupdate', () => {
+  if (audio.duration) {
+    progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    const cur = formatTime(audio.currentTime);
+    const dur = formatTime(audio.duration);
+    trackTime.textContent = cur + ' / ' + dur;
+  }
+  updateLyrics();
+});
+
+progressWrap.addEventListener('click', (e) => {
+  const rect = progressWrap.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = pct * audio.duration;
+});
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + String(sec).padStart(2, '0');
+}
+
+// === СИНХРОННЫЕ ТЕКСТЫ ===
+function updateLyrics() {
+  const track = tracks[currentTrack];
+  if (!track || !track.lyrics) return;
+  const t = audio.currentTime;
+  let currentLine = '';
+  for (let i = track.lyrics.length - 1; i >= 0; i--) {
+    if (t >= track.lyrics[i][0]) {
+      currentLine = track.lyrics[i][1];
+      break;
+    }
+  }
+  if (lyricsEl.textContent !== currentLine) {
+    lyricsEl.style.opacity = '0';
+    setTimeout(() => {
+      lyricsEl.textContent = currentLine;
+      lyricsEl.style.opacity = '1';
+    }, 150);
+  }
+}
+
+// === ВИЗУАЛИЗАТОР (Web Audio API) ===
+function initVisualizer() {
+  if (visualizerStarted) return;
+  visualizerStarted = true;
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  source = audioCtx.createMediaElementSource(audio);
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  analyser.fftSize = 128;
+  bufferLength = analyser.frequencyBinCount;
+  dataArray = new Uint8Array(bufferLength);
+
+  drawVisualizer();
+}
+
+function drawVisualizer() {
+  requestAnimationFrame(drawVisualizer);
+
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  analyser.getByteFrequencyData(dataArray);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const barCount = bufferLength;
+  const barWidth = canvas.width / barCount;
+  const centerY = canvas.height / 2;
+
+  for (let i = 0; i < barCount; i++) {
+    const val = dataArray[i] / 255;
+    const barHeight = val * centerY * 0.9;
+
+    // Градиент от розового к фиолетовому
+    const r = 255;
+    const g = 45 + (i / barCount) * 50;
+    const b = 138 + (i / barCount) * 117;
+    const alpha = 0.4 + val * 0.6;
+
+    ctx.fillStyle = 'rgba(' + Math.floor(r) + ',' + Math.floor(g) + ',' + Math.floor(b) + ',' + alpha + ')';
+
+    // Волна вверх от центра
+    ctx.fillRect(i * barWidth, centerY - barHeight, barWidth - 1, barHeight);
+    // Зеркальная волна вниз
+    ctx.fillRect(i * barWidth, centerY, barWidth - 1, barHeight * 0.6);
+  }
+
+  // Центральная линия
+  ctx.fillStyle = 'rgba(255, 45, 138, 0.15)';
+  ctx.fillRect(0, centerY - 0.5, canvas.width, 1);
+}
+
+// Инициализация
+loadTrack(0);
+renderPlaylist();
+  
+</script>
+</body>
+  </html>

@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bio</title>
+<script>
+  // Apply the saved theme before paint. Sienna is the intentional default.
+  (function () {
+    var theme = 'sienna';
+    try {
+      var saved = localStorage.getItem('raven-theme');
+      if (saved === 'glitch' || saved === 'sienna') theme = saved;
+    } catch (error) {}
+    document.documentElement.dataset.theme = theme;
+  }());
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
 
@@ -954,10 +965,342 @@
   margin-right: 0.8rem;
   font-size: 0.7rem;
 }
+
+/* ================================================================
+   SIENNA THEME — warm acoustic alternative, selected by default
+   The original black / pink visual language remains untouched above.
+   ================================================================ */
+:root {
+  color-scheme: dark;
+}
+
+.theme-switch {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top));
+  right: max(1rem, env(safe-area-inset-right));
+  z-index: 10020;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  min-height: 44px;
+  padding: .5rem .85rem;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 999px;
+  background: rgba(22,18,17,.76);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(0,0,0,.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font: 700 .66rem/1 'Inter', sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform .25s ease, background .25s ease, border-color .25s ease;
+}
+
+.theme-switch:hover { transform: translateY(-2px); }
+.theme-switch:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.theme-switch__icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: conic-gradient(currentColor 0 50%, transparent 50% 100%);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.08);
+  transform-origin: center;
+  transform: rotate(0deg);
+  transition: transform .46s cubic-bezier(.22,.8,.3,1), border-radius .46s ease;
+}
+html[data-theme="glitch"] .theme-switch__icon {
+  transform: rotate(180deg);
+}
+
+html[data-theme="sienna"] {
+  color-scheme: dark;
+  scrollbar-color: #f3b497 #843f30;
+}
+
+html[data-theme="sienna"] body {
+  background:
+    radial-gradient(circle at 10% 5%, rgba(255,215,187,.24), transparent 30rem),
+    radial-gradient(circle at 95% 34%, rgba(103,42,31,.34), transparent 34rem),
+    linear-gradient(150deg, #b96549 0%, #a6503b 46%, #8a402f 100%);
+  color: #fff4eb;
+  font-weight: 400;
+}
+
+html[data-theme="sienna"] body::before {
+  opacity: .035;
+  mix-blend-mode: soft-light;
+}
+
+html[data-theme="sienna"] body::after,
+html[data-theme="sienna"] .glitch-line,
+html[data-theme="sienna"] .side-wave { display: none; }
+
+html[data-theme="sienna"] ::-webkit-scrollbar-track { background: #843f30; }
+html[data-theme="sienna"] ::-webkit-scrollbar-thumb { background: #f3b497; }
+html[data-theme="sienna"] ::selection { background: #ffe0ce; color: #713526; }
+
+html[data-theme="sienna"] .theme-switch {
+  background: rgba(126,56,42,.76);
+  border-color: rgba(255,255,255,.78);
+  box-shadow: 0 10px 32px rgba(87,33,23,.28);
+}
+
+html[data-theme="sienna"] .hero {
+  isolation: isolate;
+  overflow: hidden;
+  min-height: min(100svh, 980px);
+  padding: clamp(5rem, 11vw, 8rem) 1.5rem;
+}
+
+html[data-theme="sienna"] .hero::before,
+html[data-theme="sienna"] .hero::after {
+  content: '';
+  position: absolute;
+  left: -12vw;
+  width: 124vw;
+  height: clamp(90px, 15vw, 190px);
+  z-index: -1;
+  border: 1px solid rgba(255,244,235,.24);
+  border-radius: 50%;
+  transform: rotate(-5deg);
+  pointer-events: none;
+}
+html[data-theme="sienna"] .hero::before { top: 14%; }
+html[data-theme="sienna"] .hero::after { bottom: 8%; transform: rotate(4deg); opacity: .65; }
+
+html[data-theme="sienna"] .hero__play {
+  color: #fff4eb;
+  opacity: .88;
+  letter-spacing: .42em;
+}
+html[data-theme="sienna"] .hero__name {
+  color: #fff8f2;
+  letter-spacing: -.025em;
+  text-shadow: 0 18px 52px rgba(90,34,24,.28);
+}
+html[data-theme="sienna"] .hero__name:hover { animation: none; }
+html[data-theme="sienna"] .hero__tagline,
+html[data-theme="sienna"] .hero__quote,
+html[data-theme="sienna"] .hero__scroll { color: #ffe6d8; }
+html[data-theme="sienna"] .hero__tagline,
+html[data-theme="sienna"] .hero__quote {
+  padding: .32rem .65rem;
+  border-radius: 10px;
+  background: rgba(91,37,27,.58);
+}
+html[data-theme="sienna"] .hero__quote { opacity: 1; }
+html[data-theme="sienna"] .hero__quote,
+html[data-theme="sienna"] .section-quote,
+html[data-theme="sienna"] .footer-quote {
+  animation: none !important;
+  text-shadow: none !important;
+  transition: opacity .45s ease, transform .45s ease;
+}
+html[data-theme="sienna"] .hero__divider { background: rgba(255,255,255,.62); }
+html[data-theme="sienna"] .hero__scroll-line {
+  position: relative;
+  width: 64px;
+  height: 18px;
+  overflow: hidden;
+  background: none;
+  animation: siennaWaveCue 3.2s ease-in-out infinite;
+}
+html[data-theme="sienna"] .hero__scroll-line::before,
+html[data-theme="sienna"] .hero__scroll-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 17px;
+  border-top: 1px solid rgba(255,247,240,.92);
+  border-radius: 50%;
+}
+html[data-theme="sienna"] .hero__scroll-line::before { top: 7px; }
+html[data-theme="sienna"] .hero__scroll-line::after {
+  top: 11px;
+  opacity: .48;
+  transform: scaleX(.76);
+}
+@keyframes siennaWaveCue {
+  0%, 100% { opacity: .5; transform: scaleX(.82); }
+  50% { opacity: 1; transform: scaleX(1); }
+}
+
+html[data-theme="sienna"] .content,
+html[data-theme="sienna"] .player {
+  position: relative;
+  width: min(800px, calc(100% - 2rem));
+  border: 1px solid rgba(255,255,255,.26);
+  border-radius: 28px;
+  background: rgba(111,47,35,.24);
+  box-shadow: 0 30px 80px rgba(83,31,22,.18);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+html[data-theme="sienna"] .content {
+  padding: clamp(1.25rem, 4vw, 3rem);
+  margin-bottom: clamp(3rem, 8vw, 6rem);
+}
+html[data-theme="sienna"] .player {
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+  border-top-color: rgba(255,255,255,.26);
+}
+
+html[data-theme="sienna"] h2,
+html[data-theme="sienna"] .kin-name { color: #fff8f2; }
+html[data-theme="sienna"] h3 { color: #ffd8c3; }
+html[data-theme="sienna"] p,
+html[data-theme="sienna"] li,
+html[data-theme="sienna"] .about-list li,
+html[data-theme="sienna"] .fandom-list li,
+html[data-theme="sienna"] .love-list li a,
+html[data-theme="sienna"] .contact-card,
+html[data-theme="sienna"] .player__title { color: #fff0e6; }
+html[data-theme="sienna"] .bio-line,
+html[data-theme="sienna"] .section-quote,
+html[data-theme="sienna"] .muted-note,
+html[data-theme="sienna"] .muted-inline,
+html[data-theme="sienna"] .kin-source,
+html[data-theme="sienna"] .dni-note,
+html[data-theme="sienna"] .footer-quote,
+html[data-theme="sienna"] .footer-copy,
+html[data-theme="sienna"] .player__time,
+html[data-theme="sienna"] .player__track,
+html[data-theme="sienna"] .player__track-num { color: #f7cbb5; }
+html[data-theme="sienna"] .accent,
+html[data-theme="sienna"] .heart,
+html[data-theme="sienna"] .easter-egg-hidden,
+html[data-theme="sienna"] .player__lyrics { color: #fff5ed; }
+
+html[data-theme="sienna"] .divider,
+html[data-theme="sienna"] .section-quote,
+html[data-theme="sienna"] .tabs-nav,
+html[data-theme="sienna"] .kin-list li,
+html[data-theme="sienna"] .fandom-list li,
+html[data-theme="sienna"] .player__playlist,
+html[data-theme="sienna"] .player__track,
+html[data-theme="sienna"] footer { border-color: rgba(255,255,255,.2); }
+html[data-theme="sienna"] .divider { background: rgba(255,255,255,.18); }
+html[data-theme="sienna"] .dni-note { border-left-color: rgba(255,255,255,.7); }
+
+html[data-theme="sienna"] .tabs-nav { gap: .5rem; padding-bottom: .75rem; }
+html[data-theme="sienna"] .tabs-nav__btn,
+html[data-theme="sienna"] .subtabs-nav__btn,
+html[data-theme="sienna"] .collapsible,
+html[data-theme="sienna"] .link-btn,
+html[data-theme="sienna"] .player__btn,
+html[data-theme="sienna"] .social-icons a {
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 999px;
+  background: rgba(144,64,46,.48);
+  color: #fff5ed;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+html[data-theme="sienna"] .tabs-nav__btn { border-color: transparent; }
+html[data-theme="sienna"] .tabs-nav__btn:hover,
+html[data-theme="sienna"] .tabs-nav__btn.active,
+html[data-theme="sienna"] .subtabs-nav__btn:hover,
+html[data-theme="sienna"] .subtabs-nav__btn.active,
+html[data-theme="sienna"] .collapsible:hover,
+html[data-theme="sienna"] .collapsible.open,
+html[data-theme="sienna"] .link-btn:hover,
+html[data-theme="sienna"] .player__btn:hover,
+html[data-theme="sienna"] .social-icons a:hover {
+  background: #fff7f0;
+  border-color: #fff;
+  color: #843d2d;
+  transform: translateY(-1px);
+}
+html[data-theme="sienna"] .tabs-nav__btn.active::after { display: none; }
+html[data-theme="sienna"] .player__btn--play {
+  width: 48px; height: 48px;
+  background: #fff7f0;
+  color: #843d2d;
+}
+html[data-theme="sienna"] .social-icons svg { fill: #fff5ed; }
+html[data-theme="sienna"] .social-icons a:hover svg { fill: #843d2d; }
+
+html[data-theme="sienna"] .contact-card {
+  border: 1px solid rgba(255,255,255,.54);
+  border-radius: 18px;
+  background: rgba(128,55,41,.32);
+}
+html[data-theme="sienna"] .contact-card:hover {
+  border-color: #fff;
+  background: rgba(255,247,240,.14);
+  color: #fff;
+  transform: translateY(-2px);
+}
+html[data-theme="sienna"] .contact-arrow { color: #ffd4bf; }
+html[data-theme="sienna"] .contact-card:hover .contact-arrow { color: #fff; }
+
+html[data-theme="sienna"] .player__progress-wrap {
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(92,38,29,.42);
+  overflow: hidden;
+}
+html[data-theme="sienna"] .player__progress { background: #fff3e8; border-radius: inherit; }
+html[data-theme="sienna"] .player__lyrics { text-shadow: none; }
+html[data-theme="sienna"] .player__track { border-radius: 10px; padding: .65rem .55rem; }
+html[data-theme="sienna"] .player__track:hover,
+html[data-theme="sienna"] .player__track.active { color: #fff; background: rgba(255,255,255,.1); }
+html[data-theme="sienna"] .spotify-wrap { border: 1px solid rgba(255,255,255,.34); }
+html[data-theme="sienna"] img.fade-in { border-color: rgba(255,255,255,.5) !important; border-radius: 20px; }
+html[data-theme="sienna"] #tab-playlist p[style] { color: #f7cbb5 !important; }
+html[data-theme="sienna"] #tab-playlist a[style] { color: #fff7f0 !important; text-decoration: underline !important; text-underline-offset: 3px; }
+html[data-theme="sienna"] .about-list li::before { color: #ffe0cf; }
+html[data-theme="sienna"] .love-list li a:hover,
+html[data-theme="sienna"] .fandom-list li:hover,
+html[data-theme="sienna"] .easter-egg-trigger:hover { color: #fff; }
+
+html[data-theme="sienna"] .quote-burst,
+html[data-theme="sienna"] .glitching { animation: none !important; }
+
+button:focus-visible,
+a:focus-visible,
+.player__track:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .theme-switch { top: .75rem; right: .75rem; min-height: 44px; padding: .5rem .75rem; }
+  .theme-switch__label { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  html[data-theme="sienna"] .hero { min-height: 92svh; }
+  html[data-theme="sienna"] .content,
+  html[data-theme="sienna"] .player { width: calc(100% - 1rem); border-radius: 22px; }
+  html[data-theme="sienna"] .tabs-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  html[data-theme="sienna"] .tabs-nav::-webkit-scrollbar { display: none; }
+  html[data-theme="sienna"] .tabs-nav__btn { flex: 0 0 auto; }
+  html[data-theme="sienna"] .contact-card { min-width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .fade-in { opacity: 1; transform: none; }
+  .theme-switch__icon { transition: none !important; }
+}
   
 </style>
 </head>
 <body> 
+<button class="theme-switch" id="themeSwitch" type="button" aria-pressed="true" aria-label="Переключить на чёрно-розовую тему">
+  <span class="theme-switch__icon" aria-hidden="true"></span>
+  <span class="theme-switch__label">Sienna</span>
+</button>
   
 <div class="glitch-line"></div>
 <div class="glitch-line"></div>
@@ -1156,14 +1499,14 @@
 
 <!-- ======== MUSIC PLAYER ======== -->
 <div class="player" id="player">
-  <canvas id="visualizer" class="player__visualizer"></canvas>
+  <canvas id="visualizer" class="player__visualizer" role="img" aria-label="Музыкальная визуализация"></canvas>
   <div class="player__lyrics" id="lyricsDisplay"></div>
   <div class="player__controls">
-    <button class="player__btn" id="prevBtn">⟨⟨</button>
-    <button class="player__btn player__btn--play" id="playBtn">▶</button>
-    <button class="player__btn" id="nextBtn">⟩⟩</button>
+    <button class="player__btn" id="prevBtn" aria-label="Предыдущий трек">⟨⟨</button>
+    <button class="player__btn player__btn--play" id="playBtn" aria-label="Воспроизвести">▶</button>
+    <button class="player__btn" id="nextBtn" aria-label="Следующий трек">⟩⟩</button>
   </div>
-  <div class="player__progress-wrap" id="progressWrap">
+  <div class="player__progress-wrap" id="progressWrap" role="slider" tabindex="0" aria-label="Позиция в треке" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
     <div class="player__progress" id="progressBar"></div>
   </div>
   <div class="player__info">
@@ -1190,6 +1533,29 @@
 </footer>
 
 <script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const themeSwitch = document.getElementById('themeSwitch');
+
+  function applyTheme(theme, persist) {
+    const nextTheme = theme === 'glitch' ? 'glitch' : 'sienna';
+    document.documentElement.dataset.theme = nextTheme;
+    const isSienna = nextTheme === 'sienna';
+    themeSwitch.setAttribute('aria-pressed', String(isSienna));
+    themeSwitch.setAttribute('aria-label', isSienna
+      ? 'Переключить на чёрно-розовую тему'
+      : 'Переключить на терракотовую тему');
+    themeSwitch.querySelector('.theme-switch__label').textContent = isSienna ? 'Sienna' : 'Glitch';
+    if (persist) {
+      try { localStorage.setItem('raven-theme', nextTheme); } catch (error) {}
+    }
+    document.dispatchEvent(new CustomEvent('raventhemechange', { detail: nextTheme }));
+  }
+
+  themeSwitch.addEventListener('click', () => {
+    applyTheme(document.documentElement.dataset.theme === 'sienna' ? 'glitch' : 'sienna', true);
+  });
+  applyTheme(document.documentElement.dataset.theme, false);
+
   // ---- ЦИТАТЫ ШИРАНА ----
   const quotes = [
     "Kept quiet, but I came to be heard",
@@ -1217,6 +1583,21 @@
 // Функция смены цитаты с мощным глитчем
 function changeQuoteWithBurst(element, interval) {
   setInterval(() => {
+    if (document.hidden) return;
+    const calmTheme = document.documentElement.dataset.theme === 'sienna';
+    if (calmTheme || reduceMotion.matches) {
+      element.classList.remove('quote-burst', 'glitching');
+      if (!reduceMotion.matches) {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(4px)';
+      }
+      setTimeout(() => {
+        element.textContent = '"' + getRandomQuote(element.textContent) + '"';
+        element.style.opacity = '';
+        element.style.transform = '';
+      }, reduceMotion.matches ? 0 : 350);
+      return;
+    }
     // Мощный глитч
     element.classList.add('quote-burst');
     element.style.opacity = '0';
@@ -1253,6 +1634,7 @@ changeQuoteWithBurst(footerQuote, 14000);
   );
 
   function triggerRandomGlitch() {
+    if (document.documentElement.dataset.theme !== 'glitch' || reduceMotion.matches || document.hidden) return;
     // Выбираем 1-3 случайных элемента
     let count = Math.floor(Math.random() * 3) + 1;
     for (let i = 0; i < count; i++) {
@@ -1276,6 +1658,7 @@ changeQuoteWithBurst(footerQuote, 14000);
 
   // ---- СЛУЧАЙНЫЕ ГОРИЗОНТАЛЬНЫЕ ГЛИТЧ-ПОЛОСЫ ----
   function spawnGlitchBar() {
+    if (document.documentElement.dataset.theme !== 'glitch' || reduceMotion.matches || document.hidden) return;
     const bar = document.createElement('div');
     bar.style.cssText = `
       position: fixed;
@@ -1347,6 +1730,7 @@ changeQuoteWithBurst(footerQuote, 14000);
   // ---- ГЛИТЧ ПРИ ХОВЕРЕ НА ЗАГОЛОВКИ ----
   document.querySelectorAll('h2, h3, .hero__name').forEach(el => {
     el.addEventListener('mouseenter', () => {
+      if (document.documentElement.dataset.theme !== 'glitch' || reduceMotion.matches) return;
       el.classList.add('glitching');
       setTimeout(() => el.classList.remove('glitching'), 200);
     });
@@ -1354,10 +1738,12 @@ changeQuoteWithBurst(footerQuote, 14000);
   
   // ---- COLLAPSIBLE SECTIONS ----
   document.querySelectorAll('.collapsible').forEach(btn => {
+    btn.setAttribute('aria-expanded', 'false');
     btn.addEventListener('click', () => {
       btn.classList.toggle('open');
       const content = btn.nextElementSibling;
       content.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(content.classList.contains('open')));
       btn.textContent = content.classList.contains('open') ? 'свернуть ▴' : 'ещё обо мне ▾';
     });
   });
@@ -1888,6 +2274,7 @@ const audio = new Audio();
 let currentTrack = 0;
 let audioCtx, analyser, source, dataArray, bufferLength;
 let visualizerStarted = false;
+let visualizerFrame = null;
 
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
@@ -1907,8 +2294,18 @@ function renderPlaylist() {
   tracks.forEach((t, i) => {
     const div = document.createElement('div');
     div.className = 'player__track' + (i === currentTrack ? ' active' : '');
+    div.setAttribute('role', 'button');
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('aria-label', 'Включить: ' + t.title);
     div.innerHTML = '<span><span class="player__track-num">' + String(i + 1).padStart(2, '0') + '</span>' + t.title + '</span>';
     div.addEventListener('click', () => { currentTrack = i; loadAndPlay(); });
+    div.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        currentTrack = i;
+        loadAndPlay();
+      }
+    });
     playlistEl.appendChild(div);
   });
 }
@@ -1925,6 +2322,7 @@ function loadAndPlay() {
   loadTrack(currentTrack);
   audio.play();
   playBtn.textContent = '❚❚';
+  playBtn.setAttribute('aria-label', 'Пауза');
   initVisualizer();
 }
 
@@ -1934,10 +2332,12 @@ playBtn.addEventListener('click', () => {
     if (!audio.src || audio.src === window.location.href) loadTrack(currentTrack);
     audio.play();
     playBtn.textContent = '❚❚';
+    playBtn.setAttribute('aria-label', 'Пауза');
     initVisualizer();
   } else {
     audio.pause();
     playBtn.textContent = '▶';
+    playBtn.setAttribute('aria-label', 'Воспроизвести');
   }
 });
 
@@ -1960,6 +2360,7 @@ audio.addEventListener('ended', () => {
 audio.addEventListener('timeupdate', () => {
   if (audio.duration) {
     progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    progressWrap.setAttribute('aria-valuenow', String(Math.round(audio.currentTime / audio.duration * 100)));
     const cur = formatTime(audio.currentTime);
     const dur = formatTime(audio.duration);
     trackTime.textContent = cur + ' / ' + dur;
@@ -1971,6 +2372,12 @@ progressWrap.addEventListener('click', (e) => {
   const rect = progressWrap.getBoundingClientRect();
   const pct = (e.clientX - rect.left) / rect.width;
   audio.currentTime = pct * audio.duration;
+});
+
+progressWrap.addEventListener('keydown', (event) => {
+  if (!audio.duration || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return;
+  event.preventDefault();
+  audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + (event.key === 'ArrowRight' ? 5 : -5)));
 });
 
 function formatTime(s) {
@@ -2011,6 +2418,7 @@ function initVisualizer() {
   source.connect(analyser);
   analyser.connect(audioCtx.destination);
   analyser.fftSize = 128;
+  analyser.smoothingTimeConstant = 0.84;
   bufferLength = analyser.frequencyBinCount;
   dataArray = new Uint8Array(bufferLength);
 
@@ -2018,18 +2426,35 @@ function initVisualizer() {
 }
 
 function drawVisualizer() {
-  requestAnimationFrame(drawVisualizer);
+  if (document.hidden) {
+    visualizerFrame = null;
+    return;
+  }
+  visualizerFrame = reduceMotion.matches
+    ? setTimeout(drawVisualizer, 250)
+    : requestAnimationFrame(drawVisualizer);
 
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  const displayWidth = Math.max(1, canvas.offsetWidth);
+  const displayHeight = Math.max(1, canvas.offsetHeight);
+  if (canvas.width !== Math.round(displayWidth * pixelRatio) || canvas.height !== Math.round(displayHeight * pixelRatio)) {
+    canvas.width = Math.round(displayWidth * pixelRatio);
+    canvas.height = Math.round(displayHeight * pixelRatio);
+  }
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
   analyser.getByteFrequencyData(dataArray);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+  if (document.documentElement.dataset.theme === 'sienna') {
+    drawSiennaWaves(displayWidth, displayHeight);
+    return;
+  }
 
   const barCount = bufferLength;
-  const barWidth = canvas.width / barCount;
-  const centerY = canvas.height / 2;
+  const barWidth = displayWidth / barCount;
+  const centerY = displayHeight / 2;
 
   for (let i = 0; i < barCount; i++) {
     const val = dataArray[i] / 255;
@@ -2051,12 +2476,61 @@ function drawVisualizer() {
 
   // Центральная линия
   ctx.fillStyle = 'rgba(255, 45, 138, 0.15)';
-  ctx.fillRect(0, centerY - 0.5, canvas.width, 1);
+  ctx.fillRect(0, centerY - 0.5, displayWidth, 1);
 }
+
+function drawSiennaWaves(width, height) {
+  const center = height / 2;
+  const points = reduceMotion.matches ? 24 : 48;
+  const energy = dataArray.reduce((sum, value) => sum + value, 0) / (dataArray.length * 255);
+  const amplitude = reduceMotion.matches ? 4 : 5 + energy * 18;
+
+  [0, 1, 2].forEach(layer => {
+    ctx.beginPath();
+    for (let i = 0; i <= points; i++) {
+      const x = (i / points) * width;
+      const sampleIndex = Math.min(dataArray.length - 1, Math.floor((i / points) * dataArray.length));
+      const sample = dataArray[sampleIndex] / 255;
+      const phase = (i / points) * Math.PI * (2.2 + layer * .35) + layer * 1.4;
+      const y = center + Math.sin(phase) * (amplitude * (.48 + sample)) + (layer - 1) * 8;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = layer === 1 ? 'rgba(255,247,240,.82)' : 'rgba(255,216,195,.36)';
+    ctx.lineWidth = layer === 1 ? 1.6 : 1;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  });
+}
+
+function paintIdleVisualizer() {
+  if (visualizerStarted || document.hidden) return;
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(1, canvas.offsetWidth);
+  const height = Math.max(1, canvas.offsetHeight);
+  canvas.width = Math.round(width * pixelRatio);
+  canvas.height = Math.round(height * pixelRatio);
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  if (document.documentElement.dataset.theme === 'sienna') {
+    const idleData = dataArray;
+    dataArray = new Uint8Array(64);
+    drawSiennaWaves(width, height);
+    dataArray = idleData;
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && visualizerStarted && !visualizerFrame) drawVisualizer();
+  if (!document.hidden && !visualizerStarted) paintIdleVisualizer();
+});
+document.addEventListener('raventhemechange', paintIdleVisualizer);
+window.addEventListener('resize', paintIdleVisualizer, { passive: true });
 
 // Инициализация
 loadTrack(0);
 renderPlaylist();
+paintIdleVisualizer();
   
 </script>
 </body>
