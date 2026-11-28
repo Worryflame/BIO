@@ -2826,30 +2826,33 @@ function liquidRadiusAt(x, layer, side) {
   const [low, mid, high] = visualizerState.bands;
   const energy = visualizerState.energy;
   const direction = side === 'upper' ? 1 : -1;
-  const taper = Math.pow(Math.max(0, Math.sin(Math.PI * x)), 1.35);
+  const taper = Math.pow(Math.max(0, Math.sin(Math.PI * x)), .52);
   const centers = [
-    .5 + .245 * Math.sin(flow * .71 - .55),
-    .5 + .205 * Math.sin(flow * .93 + 1.72),
-    .5 + .27 * Math.sin(flow * .56 + 3.46)
+    .3 + .16 * Math.sin(flow * .62),
+    .52 + .18 * Math.sin(flow * .7 + 2.1),
+    .72 + .15 * Math.sin(flow * .58 + 4.2)
   ];
-  const widths = [.205, .17, .14];
+  const widths = [.135, .12, .11];
   const drives = [low, mid, high];
-  const weights = [25, 20, 14];
-  let body = 4.4 + energy * 2.2;
+  const weights = [24, 22, 20];
+  const pressure = [10, 13, 12];
+  let body = 4.2 + energy * 1.4;
 
   for (let index = 0; index < centers.length; index++) {
     const wake = direction * (.012 + index * .004) * Math.sin(flow * (.8 + index * .11) + index);
     const distance = (x - centers[index] - wake) / widths[index];
-    body += Math.exp(-distance * distance) * weights[index]
-      * (drives[index] * .88 + energy * .16);
+    body += Math.exp(-distance * distance)
+      * (drives[index] * weights[index] * .72 + energy * pressure[index]);
   }
 
-  // A broad, delayed bridge lets neighbouring lobes merge through soft necks
+  // Broad, delayed bridges let neighbouring lobes merge through soft necks
   // instead of making the whole silhouette expand and contract as one strip.
-  const bridgeCenter = (centers[0] + centers[1]) * .5
-    + direction * .014 * Math.sin(flow * .64 + 2.1);
-  const bridgeDistance = (x - bridgeCenter) / .255;
-  body += Math.exp(-bridgeDistance * bridgeDistance) * energy * 8.5;
+  for (let index = 0; index < centers.length - 1; index++) {
+    const bridgeCenter = (centers[index] + centers[index + 1]) * .5
+      + direction * .012 * Math.sin(flow * .64 + index * 1.7);
+    const bridgeDistance = (x - bridgeCenter) / .18;
+    body += Math.exp(-bridgeDistance * bridgeDistance) * energy * 3.4;
+  }
 
   const layerScale = layer ? 1.08 : 1;
   const sideScale = side === 'upper' ? 1 : .82;
@@ -2860,7 +2863,7 @@ function liquidRadiusAt(x, layer, side) {
 
 function buildLiquidLayer(width, center, layer) {
   const steps = 30;
-  const inset = Math.min(24, width * .06);
+  const inset = Math.min(48, width * .085);
   const liquidWidth = width - inset * 2;
   const upper = [];
   const lower = [];
