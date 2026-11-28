@@ -1178,14 +1178,14 @@ html[data-theme="sienna"] .player {
   html[data-theme="sienna"] .content,
   html[data-theme="sienna"] .player {
     background:
-      linear-gradient(145deg, rgba(255,247,236,.09), rgba(255,241,224,.018) 44%, rgba(91,37,27,.05)),
-      rgba(103,43,31,.23);
+      linear-gradient(145deg, rgba(255,247,236,.055), rgba(255,241,224,.01) 44%, rgba(91,37,27,.025)),
+      rgba(103,43,31,.11);
     box-shadow:
       0 24px 64px rgba(68,25,17,.2),
       inset 0 1px 0 rgba(255,250,242,.22),
       inset 0 -1px 0 rgba(80,28,18,.1);
-    backdrop-filter: blur(11px) saturate(1.16);
-    -webkit-backdrop-filter: blur(11px) saturate(1.16);
+    backdrop-filter: blur(9px) saturate(1.16);
+    -webkit-backdrop-filter: blur(9px) saturate(1.16);
   }
 }
 html[data-theme="sienna"] .content {
@@ -2751,6 +2751,7 @@ const visualizerState = {
   energy: 0,
   bands: [0, 0, 0],
   clock: 0,
+  siennaFlow: 0,
   lastTime: 0,
   glitchReveal: 0,
   forceCollapse: false
@@ -2821,28 +2822,44 @@ function sampleVisualizerAudio(dt) {
 }
 
 function liquidRadiusAt(x, layer, side) {
-  const taper = Math.pow(Math.sin(Math.PI * x), 2);
-  const phase = visualizerState.clock * (layer ? .72 : .9) + (layer ? 1.15 : 0);
-  const direction = side === 'upper' ? 1 : -1;
-  const fluidShape = .64
-    + .22 * Math.sin(x * Math.PI * 2 + phase * direction)
-    + .14 * Math.cos(x * Math.PI * 4 - phase * .42)
-    + .07 * Math.sin(x * Math.PI * 6 + phase * .25 * direction);
+  const flow = visualizerState.siennaFlow + (layer ? .42 : 0);
   const [low, mid, high] = visualizerState.bands;
-  const lowLobe = Math.exp(-Math.pow((x - .27) / .24, 2)) * low;
-  const midLobe = Math.exp(-Math.pow((x - .56) / .23, 2)) * mid;
-  const highLobe = Math.exp(-Math.pow((x - .77) / .19, 2)) * high;
-  const audioShape = .52 + lowLobe * .28 + midLobe * .24 + highLobe * .14;
-  const base = layer ? 6 : 4;
-  const response = layer ? 92 : 82;
-  const asymmetry = side === 'upper' ? 1 : .82;
-  const value = taper * (base + visualizerState.energy * response * fluidShape * audioShape) * asymmetry;
+  const energy = visualizerState.energy;
+  const direction = side === 'upper' ? 1 : -1;
+  const taper = Math.pow(Math.max(0, Math.sin(Math.PI * x)), 1.35);
+  const centers = [
+    .5 + .245 * Math.sin(flow * .71 - .55),
+    .5 + .205 * Math.sin(flow * .93 + 1.72),
+    .5 + .27 * Math.sin(flow * .56 + 3.46)
+  ];
+  const widths = [.205, .17, .14];
+  const drives = [low, mid, high];
+  const weights = [25, 20, 14];
+  let body = 4.4 + energy * 2.2;
+
+  for (let index = 0; index < centers.length; index++) {
+    const wake = direction * (.012 + index * .004) * Math.sin(flow * (.8 + index * .11) + index);
+    const distance = (x - centers[index] - wake) / widths[index];
+    body += Math.exp(-distance * distance) * weights[index]
+      * (drives[index] * .88 + energy * .16);
+  }
+
+  // A broad, delayed bridge lets neighbouring lobes merge through soft necks
+  // instead of making the whole silhouette expand and contract as one strip.
+  const bridgeCenter = (centers[0] + centers[1]) * .5
+    + direction * .014 * Math.sin(flow * .64 + 2.1);
+  const bridgeDistance = (x - bridgeCenter) / .255;
+  body += Math.exp(-bridgeDistance * bridgeDistance) * energy * 8.5;
+
+  const layerScale = layer ? 1.08 : 1;
+  const sideScale = side === 'upper' ? 1 : .82;
+  const value = taper * body * layerScale * sideScale;
   const limit = side === 'upper' ? (layer ? 41 : 37) : (layer ? 34 : 30);
   return limit * Math.tanh(value / limit);
 }
 
 function buildLiquidLayer(width, center, layer) {
-  const steps = 14;
+  const steps = 30;
   const inset = Math.min(24, width * .06);
   const liquidWidth = width - inset * 2;
   const upper = [];
@@ -2970,6 +2987,9 @@ function renderVisualizer(timestamp, sampleAudio) {
   if (sampleAudio) sampleVisualizerAudio(dt);
   if (!reduceMotion.matches && !audio.paused) {
     visualizerState.clock += dt * (1.65 + visualizerState.energy * 1.7);
+    if (document.documentElement.dataset.theme === 'sienna') {
+      visualizerState.siennaFlow += dt * (.42 + visualizerState.energy * 1.08);
+    }
   }
   ctx.clearRect(0, 0, dimensions.width, dimensions.height);
   if (document.documentElement.dataset.theme === 'sienna') {
