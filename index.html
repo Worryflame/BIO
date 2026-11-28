@@ -1159,22 +1159,39 @@ html[data-theme="sienna"] .content,
 html[data-theme="sienna"] .player {
   position: relative;
   width: min(800px, calc(100% - 2rem));
-  border: 1px solid rgba(255,255,255,.26);
+  border: 1px solid rgba(255,239,224,.3);
+  border-top-color: rgba(255,247,236,.48);
+  border-bottom-color: rgba(255,229,211,.18);
   border-radius: 28px;
-  background: rgba(111,47,35,.24);
-  box-shadow: 0 30px 80px rgba(83,31,22,.18);
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+   /* Opaque acrylic fallback for the Sienna content backing surface. */
+  background:
+    linear-gradient(145deg, rgba(255,241,224,.08), rgba(255,241,224,0) 42%),
+    #87402f;
+  box-shadow:
+    0 24px 64px rgba(68,25,17,.2),
+    inset 0 1px 0 rgba(255,247,236,.15),
+    inset 0 -1px 0 rgba(80,28,18,.1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  html[data-theme="sienna"] .content,
+  html[data-theme="sienna"] .player {
+    background:
+      linear-gradient(145deg, rgba(255,247,236,.09), rgba(255,241,224,.018) 44%, rgba(91,37,27,.05)),
+      rgba(103,43,31,.23);
+    box-shadow:
+      0 24px 64px rgba(68,25,17,.2),
+      inset 0 1px 0 rgba(255,250,242,.22),
+      inset 0 -1px 0 rgba(80,28,18,.1);
+    backdrop-filter: blur(11px) saturate(1.16);
+    -webkit-backdrop-filter: blur(11px) saturate(1.16);
+  }
 }
 html[data-theme="sienna"] .content {
   padding: clamp(1.25rem, 4vw, 3rem);
   margin-bottom: clamp(3rem, 8vw, 6rem);
 }
-html[data-theme="sienna"] .player {
-  padding: clamp(1.25rem, 4vw, 2.25rem);
-  border-top-color: rgba(255,255,255,.26);
-}
-
 html[data-theme="sienna"] h2,
 html[data-theme="sienna"] .kin-name { color: #fff8f2; }
 html[data-theme="sienna"] h3 { color: #ffd8c3; }
@@ -1305,6 +1322,26 @@ a:focus-visible,
   html[data-theme="sienna"] .contact-card { min-width: 100%; }
 }
 
+/* Quiet Sienna atmosphere: a viewport layer beneath the acrylic surfaces. */
+.sienna-particles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+html[data-theme="sienna"] .sienna-particles { opacity: 1; }
+html[data-theme="sienna"] .hero,
+html[data-theme="sienna"] .content,
+html[data-theme="sienna"] .player,
+html[data-theme="sienna"] footer {
+  position: relative;
+  z-index: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
@@ -1327,6 +1364,7 @@ a:focus-visible,
 </style>
 </head>
 <body> 
+<canvas class="sienna-particles" id="siennaParticles" aria-hidden="true"></canvas>
 <button class="theme-switch" id="themeSwitch" type="button" aria-pressed="true" aria-label="Переключить на чёрно-розовую тему">
   <span class="theme-switch__icon" aria-hidden="true"></span>
   <span class="theme-switch__label">Sienna</span>
@@ -1585,6 +1623,258 @@ a:focus-visible,
     applyTheme(document.documentElement.dataset.theme === 'sienna' ? 'glitch' : 'sienna', true);
   });
   applyTheme(document.documentElement.dataset.theme, false);
+
+  // ---- SIENNA BACKGROUND PARTICLES ----
+  (() => {
+    const canvas = document.getElementById('siennaParticles');
+    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+    if (!ctx) return;
+
+    const coarsePointer = window.matchMedia('(pointer: coarse)');
+    let particles = [];
+    let frame = null;
+    let width = 0;
+    let height = 0;
+    let pointerX = 0;
+    let pointerY = 0;
+    let pointerVX = 0;
+    let pointerVY = 0;
+    let pointerActive = false;
+    let lastTime = 0;
+    let updateParity = 0;
+
+    const isSienna = () => document.documentElement.dataset.theme === 'sienna';
+    const shouldAnimate = () => isSienna() && !reduceMotion.matches && !document.hidden;
+
+    const grainColors = ['#dfa879', '#e7b78b', '#edc49f', '#d99d70'];
+    const grainAlphas = [.52, .59, .66, .72];
+
+    function makeParticle(index, count) {
+      // A tight offset grid gives the field full, even coverage without a pattern.
+      const columns = Math.max(8, Math.ceil(Math.sqrt(count * width / Math.max(height, 1))));
+      const rows = Math.ceil(count / columns);
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      const seed = Math.random();
+      const homeX = ((column + .18 + Math.random() * .64) / columns) * width;
+      const homeY = ((row + .18 + Math.random() * .64) / rows) * height;
+      return {
+        x: homeX,
+        y: homeY,
+        homeX,
+        homeY,
+        vx: (Math.random() - .5) * 1.2,
+        vy: (Math.random() - .5) * 1.2,
+        radius: .58 + seed * .78,
+        tone: Math.floor(Math.random() * grainColors.length),
+        depth: .35 + Math.random() * .65,
+        burst: 0,
+        phase: Math.random() * Math.PI * 2,
+        frequency: .65 + Math.random() * 1.35
+      };
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      const motionAlpha = reduceMotion.matches ? .58 : 1;
+      let activeTone = -1;
+      for (const particle of particles) {
+        if (particle.tone !== activeTone) {
+          activeTone = particle.tone;
+          ctx.globalAlpha = grainAlphas[activeTone] * motionAlpha;
+          ctx.fillStyle = grainColors[activeTone];
+        }
+        const size = particle.radius * 2;
+        ctx.fillRect(particle.x - particle.radius, particle.y - particle.radius, size, size);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function resize() {
+      const oldWidth = width || window.innerWidth;
+      const oldHeight = height || window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Roughly one grain per 64 CSS px²: an 8px pitch reads as packed warm sand,
+      // while the cap keeps every interaction linear and bounded on large screens.
+      const count = Math.max(5000, Math.min(18000, Math.round(width * height / 64)));
+      if (!particles.length) {
+        particles = Array.from({ length: count }, (_, index) => makeParticle(index, count));
+      } else {
+        particles.forEach((particle) => {
+          particle.homeX = particle.homeX / oldWidth * width;
+          particle.homeY = particle.homeY / oldHeight * height;
+          particle.x = particle.x / oldWidth * width;
+          particle.y = particle.y / oldHeight * height;
+        });
+        while (particles.length < count) particles.push(makeParticle(particles.length, count));
+        if (particles.length > count) particles.length = count;
+      }
+      // Stable tone runs avoid thousands of canvas state changes per frame.
+      particles.sort((a, b) => a.tone - b.tone);
+      draw();
+    }
+
+    function animate(time) {
+      frame = null;
+      if (!shouldAnimate()) return;
+      const step = Math.min(2, Math.max(.35, (time - (lastTime || time - 16.7)) / 16.7));
+      lastTime = time;
+      const seconds = time * .001;
+      const ambientStrength = coarsePointer.matches ? .085 : .052;
+
+      // Alternate two interleaved cohorts: the full field still changes every
+      // frame, while each grain gets a doubled physics step every other frame.
+      updateParity ^= 1;
+      const particleStep = step * 2;
+      for (let particleIndex = updateParity; particleIndex < particles.length; particleIndex += 2) {
+        const particle = particles[particleIndex];
+        const bursting = particle.burst > 0;
+        const spring = bursting ? .0015 : .0038;
+        const orbitX = Math.sin(seconds * particle.frequency + particle.phase) * 15 * particle.depth;
+        const orbitY = Math.cos(seconds * particle.frequency * .83 + particle.phase) * 12 * particle.depth;
+        particle.vx += (particle.homeX + orbitX - particle.x) * spring * particleStep;
+        particle.vy += (particle.homeY + orbitY - particle.y) * spring * particleStep;
+
+        // Permanent small-scale turbulence keeps the packed field alive.
+        const noiseAngle = particle.phase + seconds * particle.frequency * 2.1
+          + Math.sin(particle.y * .018 + seconds * 1.7);
+        particle.vx += Math.cos(noiseAngle) * ambientStrength * particleStep;
+        particle.vy += Math.sin(noiseAngle) * ambientStrength * particleStep;
+
+        if (pointerActive && !coarsePointer.matches) {
+          let dx = particle.x - pointerX;
+          let dy = particle.y - pointerY;
+          let distance = Math.hypot(dx, dy);
+          if (distance < 210) {
+            if (distance < .1) {
+              const angle = Math.random() * Math.PI * 2;
+              dx = Math.cos(angle);
+              dy = Math.sin(angle);
+              distance = 1;
+            }
+            const nx = dx / distance;
+            const ny = dy / distance;
+            const influence = 1 - distance / 210;
+            const clearForce = distance < 72 ? (1 - distance / 72) * 4.8 : 0;
+            const flowForce = influence * influence * 1.35;
+            particle.vx += (nx * (clearForce + flowForce) + -ny * flowForce * .42) * particleStep;
+            particle.vy += (ny * (clearForce + flowForce) + nx * flowForce * .42) * particleStep;
+            particle.vx += pointerVX * influence * .11 * particle.depth;
+            particle.vy += pointerVY * influence * .11 * particle.depth;
+
+            // Keep the pointer itself visibly clean even during quick passes.
+            if (distance < 58) {
+              particle.x = pointerX + nx * 58;
+              particle.y = pointerY + ny * 58;
+              particle.vx += nx * 3.6;
+              particle.vy += ny * 3.6;
+            }
+          }
+        }
+
+        if (bursting) {
+          particle.vy += .12 * particle.burst * particleStep;
+          particle.vx += Math.cos(noiseAngle * 1.7) * .11 * particleStep;
+          particle.burst = Math.max(0, particle.burst - .006 * particleStep);
+        }
+        const damping = bursting ? .973 : .965;
+        particle.vx *= Math.pow(damping, particleStep);
+        particle.vy *= Math.pow(damping, particleStep);
+
+        // Never let the ambient field resolve into motionless anchor points.
+        if (!bursting && Math.hypot(particle.vx, particle.vy) < .22) {
+          particle.vx += Math.cos(noiseAngle) * .24;
+          particle.vy += Math.sin(noiseAngle) * .24;
+        }
+        particle.x += particle.vx * particleStep;
+        particle.y += particle.vy * particleStep;
+
+        // Soft wall collisions give the full viewport a cramped-jar rebound.
+        if (particle.x < -3) {
+          particle.x = -3;
+          particle.vx = Math.abs(particle.vx) * .82 + .18;
+        } else if (particle.x > width + 3) {
+          particle.x = width + 3;
+          particle.vx = -Math.abs(particle.vx) * .82 - .18;
+        }
+        if (particle.y < -3) {
+          particle.y = -3;
+          particle.vy = Math.abs(particle.vy) * .82 + .18;
+        } else if (particle.y > height + 3) {
+          particle.y = height + 3;
+          particle.vy = -Math.abs(particle.vy) * .82 - .18;
+        }
+      }
+      pointerVX *= Math.pow(.82, step);
+      pointerVY *= Math.pow(.82, step);
+      draw();
+      frame = requestAnimationFrame(animate);
+    }
+
+    function syncAnimation() {
+      if (frame !== null) cancelAnimationFrame(frame);
+      frame = null;
+      lastTime = 0;
+      if (shouldAnimate()) frame = requestAnimationFrame(animate);
+      else if (isSienna()) draw();
+      else ctx.clearRect(0, 0, width, height);
+    }
+
+    window.addEventListener('pointermove', (event) => {
+      if (coarsePointer.matches || event.pointerType === 'touch') return;
+      if (pointerActive) {
+        pointerVX = Math.max(-36, Math.min(36, event.clientX - pointerX));
+        pointerVY = Math.max(-36, Math.min(36, event.clientY - pointerY));
+      }
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      pointerActive = true;
+    }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', () => {
+      pointerActive = false;
+      pointerVX = 0;
+      pointerVY = 0;
+    }, { passive: true });
+
+    document.addEventListener('pointerdown', (event) => {
+      if (!shouldAnimate() || (!coarsePointer.matches && event.pointerType === 'mouse')) return;
+      for (const particle of particles) {
+        const dx = particle.x - event.clientX;
+        const dy = particle.y - event.clientY;
+        const rawDistance = Math.hypot(dx, dy);
+        const distance = Math.max(1, rawDistance);
+        const angle = rawDistance < 1 ? Math.random() * Math.PI * 2 : Math.atan2(dy, dx);
+        const proximity = Math.max(0, 1 - distance / 520);
+        const strength = 6 + proximity * 22 + Math.random() * 5;
+        particle.vx += Math.cos(angle) * strength;
+        particle.vy += Math.sin(angle) * strength - 1.5 * proximity;
+        particle.burst = 1 + Math.random() * .35;
+      }
+    }, { capture: true, passive: true });
+
+    window.addEventListener('resize', resize, { passive: true });
+    document.addEventListener('visibilitychange', syncAnimation);
+    document.addEventListener('raventhemechange', syncAnimation);
+    reduceMotion.addEventListener('change', () => {
+      particles.forEach((particle) => {
+        particle.x = particle.homeX;
+        particle.y = particle.homeY;
+        particle.vx = 0;
+        particle.vy = 0;
+      });
+      syncAnimation();
+    });
+    resize();
+    syncAnimation();
+  })();
 
   // ---- ЦИТАТЫ ШИРАНА ----
   const quotes = [
